@@ -17,11 +17,11 @@ st.sidebar.title("功能选择")
 # 创建下拉菜单供用户选择功能
 function_options = [
     "新闻爬虫", 
-    "高频词统计条形图", 
-    "词云图生成", 
+    "读取txt统计高频词生成条形图", 
+    "读取txt生成词云图", 
     "文本简要总结", 
-    "词频统计条形图",  # 这个选项与上面的"高频词统计条形图"重复，根据实际功能调整
-    "词频生成词云图"
+    "输入链接爬取内容统计词频条形图",  # 这个选项与上面的"高频词统计条形图"重复，根据实际功能调整
+    "输入链接爬取内容生成词云图"
 ]
 
 selected_option = st.sidebar.selectbox(
@@ -32,15 +32,15 @@ selected_option = st.sidebar.selectbox(
 # 根据用户选择的功能，调用相应的主函数
 if selected_option == "新闻爬虫":
     news_crawl_main()
-elif selected_option == "高频词统计条形图":
+elif selected_option == "读取txt统计高频词生成条形图":
     count_main()
-elif selected_option == "词云图生成":
+elif selected_option == "读取txt生成词云图":
     ciyuntu_main()
 elif selected_option == "文本简要总结":
     summary_main()
-elif selected_option == "词频统计条形图":
+elif selected_option == "输入链接爬取内容统计词频条形图":
     bar_chart_run()
-elif selected_option == "词频生成词云图":
+elif selected_option == "输入链接爬取内容生成词云图":
     wordcloud_run()
 else:
     st.sidebar.write("请选择一个有效选项。")
