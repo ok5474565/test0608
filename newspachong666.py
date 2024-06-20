@@ -71,7 +71,7 @@ def get_zipfile(files):
 def main():
     
     st.title("新闻爬虫")
-    st.audio("1132983854.mp3", format="audio/mp3")
+    #st.audio("1132983854.mp3", format="audio/mp3")
 
     # 允许用户选择感兴趣的新闻类别
     categories = ["教育", "科技", "体育", "娱乐", "财经", "国内", "国际"]  # 假设有这些类别
