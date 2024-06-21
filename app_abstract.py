@@ -25,7 +25,7 @@ def extract_text(html_content):
     return soup.get_text(separator=' ', strip=True)
 
 def main():
-    #st.title("新闻摘要")
+    st.title("文本简要总结")
     
     # 用户输入网址
     url = st.text_input("请输入新闻网址:")
