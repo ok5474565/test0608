@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from PIL import ImageFont
 
-def create_wordcloud(text, max_words=200):
-    # 创建词云图，限制最大单词数量
-    wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=max_words).generate(text)
+def create_wordcloud(text, font_path, max_words=200):
+    # 创建词云图，指定中文字体
+    wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=max_words, font_path=font_path).generate(text)
     return wordcloud
 
 def main():
@@ -21,8 +22,11 @@ def main():
         # 提取第一列的文本数据
         text_data = ' '.join(str(v) for v in data.iloc[:, 0])
         
+        # 指定中文字体路径，这里需要替换为你的字体文件路径
+        font_path = 'simhei.ttf'
+        
         # 创建词云图
-        wordcloud = create_wordcloud(text_data)
+        wordcloud = create_wordcloud(text_data, font_path)
         
         # 使用Streamlit的API显示词云图
         fig, ax = plt.subplots()  # 创建一个新的图形和轴
