@@ -51,10 +51,15 @@ def read_file(uploaded_file, file_type):
                 # 尝试使用指定编码读取CSV文件
                 data = pd.read_csv(uploaded_file, header=None, encoding=encoding)
                 if data.empty:
-                    st.error("CSV文件是空的，没有数据可以解析。")
-                    break
-                # 去除每行末尾的换行符，并将所有行的数据合并为一个字符串
-                text = ' '.join(str(row[0]).rstrip() for row in data.values)  # 假设我们只关心第一列
+                    st.error("CSV文件是空的，或者文件格式不正确，没有数据可以解析。")
+                    continue
+                # 检查是否有数据列，如果只有一列索引，尝试将其转换为字符串
+                if data.shape[1] == 1 and isinstance(data.iloc[0, 0], str):
+                    text = ' '.join(data.iloc[:, 0].astype(str).rstrip() for _ in range(data.shape[0]))
+                else:
+                    # 如果有多列数据，这里需要根据实际需求来处理
+                    st.error("CSV文件包含多列数据，当前只处理单列数据。")
+                    continue
             elif file_type == '.txt':
                 # 使用指定编码读取TXT文件
                 text = uploaded_file.read().decode(encoding)
