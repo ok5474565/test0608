@@ -42,7 +42,7 @@ def main():
     if uploaded_file is not None:
         if file_type == "csv":
             # 读取CSV文件，假设第一列是评论文本
-            data = pd.read_csv(uploaded_file, header=None, encoding='utf-8')
+            data = pd.read_csv(uploaded_file, header=None, encoding='gbk')
             comments = data.iloc[:, 0]  # 获取评论文本列
         elif file_type == "txt":
             # 读取TXT文件
