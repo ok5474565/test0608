@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from collections import Counter
 import jieba
-from streamlit.report_thread import get_report_ctx
 
 # 定义去停用词的函数
 def remove_stopwords(words, stopwords_set):
@@ -13,24 +12,19 @@ def get_top_words(words, top_k):
     return Counter(words).most_common(top_k)
 
 # 定义读取文件内容的函数
-def read_file(uploaded_file, file_type, encoding='utf-8'):
-    comments = []
+def read_file(uploaded_file, encoding='utf-8'):
     try:
-        if file_type == 'csv':
-            # 为CSV文件指定正确的编码
-            if encoding == 'gbk':
-                data = pd.read_csv(uploaded_file, encoding='gbk')
-            else:
-                data = pd.read_csv(uploaded_file, encoding='utf-8')
+        if uploaded_file.name.endswith('.csv'):
+            data = pd.read_csv(uploaded_file, encoding=encoding)
             comments = data.iloc[:, 0].tolist()  # 假设第一列是评论文本
-        elif file_type == 'txt':
-            # 为TXT文件指定编码
+        elif uploaded_file.name.endswith('.txt'):
             with open(uploaded_file, 'r', encoding=encoding) as f:
                 text = f.read()
             comments = text.split()  # 假设文本中单词之间用空格分隔
+        return comments
     except Exception as e:
         st.error(f"读取文件时发生错误：{e}")
-    return comments
+        return None
 
 def main():
     st.title("文本分词与高频词统计")
@@ -39,14 +33,14 @@ def main():
     uploaded_file = st.file_uploader("请上传你的文件", type=["csv", "txt"])
 
     if uploaded_file is not None:
-        # 确定文件类型
-        file_type = uploaded_file.name.split('.')[-1]
-        encoding = 'utf-8'  # 默认编码为utf-8
+        # 尝试使用utf-8编码读取文件
+        comments = read_file(uploaded_file, encoding='utf-8')
 
-        # 读取文件内容
-        comments = read_file(uploaded_file, file_type, encoding)
+        if comments is None:
+            # 如果utf-8读取失败，尝试使用GBK编码读取CSV文件，或ANSI编码读取TXT文件
+            comments = read_file(uploaded_file, encoding='gbk') if uploaded_file.name.endswith('.csv') else None
 
-        if not comments:
+        if comments is None:
             st.error("文件读取失败，请确保文件格式正确且编码无误。")
             return
 
