@@ -3,11 +3,6 @@ import pandas as pd
 from collections import Counter
 import jieba
 from wordcloud import WordCloud
-import base64
-import os
-
-# 加载自定义字体
-font_path = "simhei.ttf"  # 确保这个路径与您上传的字体文件相对应
 
 # 定义去停用词的函数
 def remove_stopwords(words, stopwords_set):
@@ -19,11 +14,22 @@ def get_top_words(words, top_k):
 
 # 定义读取TXT文件内容的函数
 def read_txt_file(uploaded_file, encoding):
-    # 与之前的代码相同...
+    try:
+        text = uploaded_file.read().decode(encoding)
+        text = text.replace('\r\n', ' ').replace('\n', ' ')
+        return text.split()
+    except Exception as e:
+        st.error(f"读取TXT文件时发生错误：{e}")
+        return None
 
 # 定义读取CSV文件内容的函数
 def read_csv_file(uploaded_file, encoding):
-    # 与之前的代码相同...
+    try:
+        data = pd.read_csv(uploaded_file, encoding=encoding)
+        return [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设CSV文件只有一列评论
+    except Exception as e:
+        st.error(f"读取CSV文件时发生错误：{e}")
+        return None
 
 def main():
     st.title("文本分词与词云图生成")
