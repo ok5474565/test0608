@@ -51,10 +51,10 @@ elif selected_option == "输入链接爬取内容统计词频条形图":
     bar_chart_run()
 elif selected_option == "输入链接爬取内容生成词云图":
     wordcloud_run()
-elif selected_option == "在线文本分词与高频词统计小程序":
-    text_analysis_main()
 elif selected_option == "在线文本分词与词云图生成小程序":
     wordcloud_main()
+elif selected_option == "在线文本分词与高频词统计小程序":
+    text_analysis_main()
 elif selected_option == "读取txt统计高频词生成条形图":
     count_main()
 elif selected_option == "读取txt生成词云图":
