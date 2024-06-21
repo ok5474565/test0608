@@ -43,7 +43,7 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 # 读取文件内容的函数
 # 定义读取文件内容的函数
-def read_file(uploaded_file, file_type, encodings=['utf-8', 'gbk', 'gb2312', 'big5', 'iso-8859-1']):
+def read_file(uploaded_file, file_type, encodings=['utf-8', 'GBK', 'gb2312', 'big5', 'iso-8859-1']):
     text = None
     for encoding in encodings:
         try:
