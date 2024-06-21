@@ -14,22 +14,20 @@ def get_top_words(words, top_k):
     return counter.most_common(top_k)
 
 # 定义读取文件内容的函数
-def read_file(file, file_type):
-    text = None  # 初始化text变量
-    common_encodings = ['utf-8', 'gbk', 'gb2312', 'big5', 'iso-8859-1']  # 常见的编码格式列表
-    for encoding in common_encodings:
+def read_file(file, file_type, encodings=['utf-8', 'gbk', 'gb2312', 'big5', 'iso-8859-1']):
+    text = None
+    for encoding in encodings:
         try:
             if file_type == '.csv':
                 data = pd.read_csv(file, header=None, encoding=encoding)
-                texts = [str(row[0]).rstrip() for row in data.values]  # 假设我们只关心第一列
+                texts = [str(row[0]).rstrip() for row in data.values]  # 假设只关心第一列
                 text = ' '.join(texts)
             elif file_type == '.txt':
-                with open(file, 'r', encoding=encoding) as f:
+                with open(file.name, 'r', encoding=encoding) as f:
                     text = f.read()
-            if text is not None:
-                break  # 如果成功读取文件，则跳出循环
+            break  # 如果成功读取，跳出循环
         except UnicodeDecodeError:
-            continue  # 如果编码错误，继续尝试下一个编码
+            continue  # 如果编码错误，尝试下一个编码
         except Exception as e:
             st.error(f"读取文件时发生错误：{e}")
             return None
@@ -42,16 +40,20 @@ def main():
     uploaded_file = st.file_uploader("请上传你的文件 (CSV或TXT)", type=["csv", "txt"])
 
     if uploaded_file is not None:
-        # 获取文件扩展名
-        file_type = uploaded_file.name.split('.')[-1].lower()
-        
+        file_type = os.path.splitext(uploaded_file.name)[1].lower().replace('.', '')  # 去除扩展名前的点
+
         # 读取文件内容
         text = read_file(uploaded_file, file_type)
-        
+
         if text is not None:
-            # 使用jieba进行分词
-            words = jieba.lcut(text)
-            
+            # 以下代码与原代码相同，处理文本、分词、统计高频词等
+            words = []
+            for line in text.splitlines():  # 按行处理文本
+                line_stripped = line.strip()
+                if line_stripped:  # 确保不处理空行
+                    comment_words = jieba.lcut(line_stripped)
+                    words.extend(comment_words)
+
             # 过滤掉空字符串和长度为1的单字符
             words = [word for word in words if word and len(word) > 1]
 
@@ -80,9 +82,6 @@ def main():
 
             # 生成条形图
             st.bar_chart(top_words_df.set_index('Word')['Frequency'])
-
-# 读取文件内容的函数定义（之前提供的函数）
-# ...
 
 if __name__ == '__main__':
     main()
