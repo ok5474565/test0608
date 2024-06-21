@@ -19,8 +19,7 @@ def load_stopwords(filepath):
 # 定义生成词云图的函数
 def generate_wordcloud(words, font_path, max_words=200):
     # 使用jieba进行分词
-    words_cut = ' '.join(jieba.cut(words))
-    
+    words_cut = ' '.join(jieba.cut(" ".join(words)))
     # 创建词云对象
     wc = WordCloud(
         font_path=font_path,
@@ -29,7 +28,6 @@ def generate_wordcloud(words, font_path, max_words=200):
         width=800,
         height=600
     ).generate(words_cut)
-    
     # 显示词云图
     image = wc.to_image()
     return image
@@ -51,16 +49,19 @@ def main():
         try:
             # 尝试使用utf-8编码读取文件
             data = pd.read_csv(uploaded_file, header=None, encoding='utf-8')
+            # 为列提供名称，这里假设CSV文件有两列数据
+            data.columns = ['Column1', 'Column2']
         except UnicodeDecodeError:
             try:
                 # 如果utf-8编码失败，尝试使用GBK编码
                 data = pd.read_csv(uploaded_file, header=None, encoding='GBK')
+                data.columns = ['Column1', 'Column2']
             except Exception as e:
                 st.error(f"读取文件时发生错误：{e}")
                 return
         
-        # 将所有行的数据合并为一个字符串
-        all_text = ' '.join(str(row[0]) for row in data.values)  # 假设我们只关心第一列
+        # 假设我们只关心第一列的数据
+        all_text = ' '.join(str(row[0]) for row in data.itertuples())
         
         # 使用jieba进行分词并去除停用词
         words = jieba.lcut(all_text)
@@ -70,7 +71,7 @@ def main():
         font_path = 'simhei.ttf'  # 请确保这个路径是正确的
         
         # 生成词云图
-        image = generate_wordcloud(" ".join(filtered_words), font_path)
+        image = generate_wordcloud(filtered_words, font_path)
         
         # 显示词云图
         st.image(image, use_column_width=True)
