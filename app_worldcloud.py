@@ -71,7 +71,7 @@ def run():
       #  page_icon="",
     #)
 
-    #st.write("# 作业展示 ")
+    st.title("输入链接爬取内容生成词云图")
 
     url = st.text_input('Enter URL:')
 
