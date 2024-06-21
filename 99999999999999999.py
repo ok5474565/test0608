@@ -46,7 +46,7 @@ def main():
             if uploaded_file.name.endswith('.csv'):
                 comments_gbk = read_file(uploaded_file, encoding='gbk')
             else:  # 文件名以.txt结尾
-                comments_ansi = read_file(uploaded_file, encoding='ANSI')
+                comments_ansi = read_file(uploaded_file, encoding='utf-8')
             # 根据文件类型选择正确的读取结果
             comments = comments_gbk if comments_gbk is not None else comments_ansi
         else:
