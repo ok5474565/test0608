@@ -52,14 +52,11 @@ def main():
         # 创建条形图的数据框
         top_words_df = pd.DataFrame(top_words, columns=['Word', 'Frequency'])
         
-        # 按词频降序排列，并重置索引
-        top_words_df = top_words_df.sort_values(by='Frequency', ascending=False).reset_index(drop=True)
-        
         # 显示高频词
         st.write("高频词统计结果：")
         st.dataframe(top_words_df)
         
-        # 生成条形图，确保条形图按照词频降序排列
+        # 生成条形图
         st.bar_chart(top_words_df.set_index('Word')['Frequency'])
 
 if __name__ == '__main__':
