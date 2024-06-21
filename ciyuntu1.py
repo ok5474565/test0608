@@ -25,11 +25,10 @@ def main():
         wordcloud = create_wordcloud(text_data)
         
         # 使用Streamlit的API显示词云图
-        st.write("Word Cloud:")
-        st.pyplot(plt.figure(figsize=(10, 5)))
-        st.pyplot(plt.imshow(wordcloud, interpolation='bilinear'))
-        plt.axis("off")
-        plt.show()
+        fig, ax = plt.subplots()  # 创建一个新的图形和轴
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis('off')  # 不显示轴
+        st.pyplot(fig)  # 将图形传递给Streamlit显示
 
 if __name__ == "__main__":
     main()
