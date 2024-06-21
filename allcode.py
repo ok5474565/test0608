@@ -1,13 +1,16 @@
 import streamlit as st
 
 # 导入子文件中的主函数
-from newspachong666 import main as news_crawl_main
+from newspachong666 import main as news_crawl_main  # 新闻爬虫
+from count import main as count_main  # 读取txt生成条形图
+from ciyuntu import main as ciyuntu_main  # 读取txt生成词云图
 from count1 import main as count_main  # 读取CSV生成条形图
 from ciyuntu3 import main as ciyuntu_gbk_main  # 读取GBK CSV生成词云图
 from ciyuntu777 import main as ciyuntu_utf8_main  # 读取UTF-8 CSV生成词云图
-from app_bar2 import run as bar_chart_run  # 假设 run 函数是条形图的主函数
-from app_abstract import main as summary_main  # 假设 main 函数是摘要的主函数
-from app_worldcloud import run as wordcloud_run  # 假设 run 函数是词云图的主函数
+from app_bar2 import run as bar_chart_run  # 爬取网页内容生成条形图
+from app_abstract import main as summary_main  # 爬取网页内容撰写摘要
+from app_worldcloud import run as wordcloud_run  # 爬取网页内容生成词云图
+
 
 # 设置页面配置
 st.set_page_config(page_title="综合文本分析工具", layout="wide")
