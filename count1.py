@@ -13,7 +13,7 @@ def get_top_words(words, top_k):
     return counter.most_common(top_k)
 
 def main():
-    st.title("评论文本分词与高频词统计")
+    st.title("UTF-8专用的评论文本分词与高频词统计")
 
     # 设置上传文件的按钮，接受CSV文件
     uploaded_file = st.file_uploader("请上传你的CSV文件", type=["csv"])
