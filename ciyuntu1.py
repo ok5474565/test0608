@@ -9,7 +9,7 @@ def create_wordcloud(text, font_path, max_words=200):
     # 使用jieba进行中文分词
     cut_text = ' '.join(jieba.cut(text))
     
-    # 创建词云图，指定中文字体和分辨率
+    # 创建词云图，指定中文字体
     wordcloud = WordCloud(width=1600, height=800, background_color='white', max_words=max_words, font_path=font_path).generate(cut_text)
     return wordcloud
 
