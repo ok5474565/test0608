@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 import numpy as np
 from PIL import Image
 import pandas as pd
+from PIL import ImageDraw, ImageFont
 
 # 辅助函数，用于清理标题中的非法字符
 def sanitize_word(word, illegal_chars):
@@ -14,15 +15,29 @@ def sanitize_word(word, illegal_chars):
 def remove_stopwords(words, stopwords):
     return [word for word in words if word not in stopwords]
 
-# 生成词云图
-def generate_wordcloud(frequencies, font_path, width=800, height=600, max_length=30):
+def generate_wordcloud(frequencies, font_path, width=800, height=600):
     wc = WordCloud(
         font_path=font_path,
         background_color='white',
         max_words=200,
         width=width,
         height=height
-    ).generate_from_frequencies({word: freq for word, freq in frequencies.items() if len(word) <= max_length})
+    )
+
+    # 排除无法渲染的词
+    valid_frequencies = {}
+    for word, freq in frequencies.items():
+        try:
+            # 使用ImageDraw和ImageFont来检查这个词是否可以被渲染
+            image = Image.new('RGB', (200, 200), (255, 255, 255))
+            draw = ImageDraw.Draw(image)
+            draw.text((10, 10), word, font=ImageFont.truetype(font_path, 20))
+            valid_frequencies[word] = freq
+        except Exception as e:
+            print(f"无法渲染词 '{word}': {e}")
+
+    # 使用有效的词频生成词云
+    wc.generate_from_frequencies(valid_frequencies)
     
     image = wc.to_image()
     st.image(image, use_column_width=True)
