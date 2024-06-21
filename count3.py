@@ -26,12 +26,18 @@ def read_txt_file(uploaded_file, encoding='utf-8'):
 
 # 修改main函数以增加对TXT文件的支持
 def main():
-    st.title("GBK专用的评论文本分词与高频词统计")
+    st.title("评论文本分词与高频词统计")
 
     # 设置上传文件的按钮，接受CSV和TXT文件
     file_type = st.selectbox(
         "请选择文件类型",
         ["csv", "txt"]
+    )
+    
+    # 允许用户选择文件编码
+    encoding_type = st.selectbox(
+        "请选择文件编码",
+        ["utf-8", "gbk"]
     )
     
     if file_type == "csv":
@@ -46,7 +52,7 @@ def main():
             comments = data.iloc[:, 0]  # 获取评论文本列
         elif file_type == "txt":
             # 读取TXT文件
-            text = read_txt_file(uploaded_file)
+            text = read_txt_file(uploaded_file, encoding=encoding_type)
             if text is None:  # 如果读取TXT文件失败，则不进行后续处理
                 return
             comments = [text]  # 将整个文本文件视为一条评论
