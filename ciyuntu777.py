@@ -42,21 +42,25 @@ def generate_wordcloud(text, font_path, max_words=200):
     return image
 
 # 读取文件内容的函数
-def read_file(file, file_type):
+def read_file(uploaded_file, file_type):
     text = None  # 初始化text变量
     common_encodings = ['utf-8', 'gbk', 'gb2312', 'big5', 'iso-8859-1']  # 常见的编码格式列表
     for encoding in common_encodings:
         try:
             if file_type == '.csv':
                 # 尝试使用指定编码读取CSV文件
-                data = pd.read_csv(file, header=None, encoding=encoding)
+                data = pd.read_csv(uploaded_file, header=None, encoding=encoding)
+                if data.empty:
+                    st.error("CSV文件是空的，没有数据可以解析。")
+                    break
                 # 去除每行末尾的换行符，并将所有行的数据合并为一个字符串
                 text = ' '.join(str(row[0]).rstrip() for row in data.values)  # 假设我们只关心第一列
             elif file_type == '.txt':
-                # 使用指定编码读取TXT文件，并去除每行末尾的换行符
-                with open(file, 'r', encoding=encoding) as f:
-                    text = ' '.join(line.rstrip() for line in f)
-            break  # 如果成功读取文件，则跳出循环
+                # 使用指定编码读取TXT文件
+                text = uploaded_file.read().decode(encoding)
+                text = text.replace('\r\n', ' ').replace('\n', ' ')  # 替换换行符为空白字符
+            if text is not None:
+                break  # 如果成功读取文件，则跳出循环
         except UnicodeDecodeError:
             continue  # 如果编码错误，继续尝试下一个编码
         except Exception as e:
