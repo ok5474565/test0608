@@ -98,9 +98,12 @@ def main():
     word_freq = {word: freq for word, freq in top_words}
     wc.generate_from_frequencies(word_freq)
 
+    # 将词云转换为PIL图像对象
+    pil_image = wc.to_image()
+
     # 显示词云图
     st.write("生成的词云图：")
-    st.image(wc, use_column_width=True)
+    st.image(pil_image, use_column_width=True)
 
 if __name__ == '__main__':
     main()
