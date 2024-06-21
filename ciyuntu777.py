@@ -52,23 +52,23 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 
 # 读取文件内容的函数
-def read_file(file, file_type):
+def read_file(uploaded_file, file_type, encoding='utf-8'):
     text = None
     common_encodings = ['utf-8', 'GBK', 'ISO-8859-1', 'Windows-1252', 'big5', 'latin1']
     
     for encoding in common_encodings:
         try:
             if file_type == '.csv':
-                # 尝试使用当前编码读取CSV文件
-                data = pd.read_csv(file, header=None, encoding=encoding)
-                # 去除每行末尾的换行符，并将所有行的数据合并为一个字符串
+                # 使用上传文件的read()方法读取内容，并尝试使用当前编码解析CSV
+                content = uploaded_file.read()
+                data = pd.read_csv(io.StringIO(content.decode(encoding)), header=None)
                 text = ' '.join(str(row[0]).rstrip() for row in data.values)  # 假设我们只关心第一列
-                break  # 如果成功读取，跳出循环
+                break
             elif file_type == '.txt':
-                # 尝试使用当前编码读取TXT文件
-                with open(file.name, 'r', encoding=encoding) as f:
-                    text = ' '.join(line.rstrip() for line in f)
-                break  # 如果成功读取，跳出循环
+                # 使用上传文件的read()方法读取内容，并尝试使用当前编码解析TXT
+                content = uploaded_file.read()
+                text = ' '.join(line.decode(encoding).rstrip() for line in content.splitlines())
+                break
         except UnicodeDecodeError:
             continue  # 如果解码错误，尝试下一个编码格式
 
