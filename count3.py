@@ -12,50 +12,28 @@ def get_top_words(words, top_k):
     counter = Counter(words)
     return counter.most_common(top_k)
 
-# 定义读取TXT文件内容的函数
-def read_txt_file(uploaded_file, encoding='utf-8'):
+# 定义读取CSV文件内容的函数
+def read_csv_file(uploaded_file, encoding='gbk'):
     try:
-        with open(uploaded_file, 'r', encoding=encoding) as file:
-            text = file.read()
-            # 替换换行符为空白字符
-            text = text.replace('\r\n', ' ').replace('\n', ' ')
+        data = pd.read_csv(uploaded_file, header=None, encoding=encoding)
+        comments = data.iloc[:, 0]  # 假设第一列是评论文本
+        return comments
     except Exception as e:
-        st.error(f"读取TXT文件时发生错误：{e}")
+        st.error(f"读取CSV文件时发生错误：{e}")
         return None
-    return text
 
-# 修改main函数以增加对TXT文件的支持
+# 修改main函数以只支持CSV文件
 def main():
-    st.title("评论文本分词与高频词统计")
+    st.title("GBK编码的评论文本分词与高频词统计")
 
-    # 设置上传文件的按钮，接受CSV和TXT文件
-    file_type = st.selectbox(
-        "请选择文件类型",
-        ["csv", "txt"]
-    )
-    
-    # 允许用户选择文件编码
-    encoding_type = st.selectbox(
-        "请选择文件编码",
-        ["utf-8", "gbk"]
-    )
-    
-    if file_type == "csv":
-        uploaded_file = st.file_uploader("请上传你的CSV文件", type=["csv"])
-    elif file_type == "txt":
-        uploaded_file = st.file_uploader("请上传你的TXT文件", type=["txt"])
+    # 设置上传文件的按钮，只接受CSV文件
+    uploaded_file = st.file_uploader("请上传你的CSV文件", type=["csv"])
     
     if uploaded_file is not None:
-        if file_type == "csv":
-            # 读取CSV文件，假设第一列是评论文本
-            data = pd.read_csv(uploaded_file, header=None, encoding='gbk')
-            comments = data.iloc[:, 0]  # 获取评论文本列
-        elif file_type == "txt":
-            # 读取TXT文件
-            text = read_txt_file(uploaded_file, encoding=encoding_type)
-            if text is None:  # 如果读取TXT文件失败，则不进行后续处理
-                return
-            comments = [text]  # 将整个文本文件视为一条评论
+        # 读取CSV文件
+        comments = read_csv_file(uploaded_file)
+        if comments is None:  # 如果读取CSV文件失败，则不进行后续处理
+            return
 
         # 以下代码与原代码相同，处理文本、分词、统计高频词等
         words = []
