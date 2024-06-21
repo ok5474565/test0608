@@ -3,9 +3,9 @@ import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-def create_wordcloud(text):
-    # 创建词云图
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+def create_wordcloud(text, max_words=200):
+    # 创建词云图，限制最大单词数量
+    wordcloud = WordCloud(width=800, height=400, background_color='white', max_words=max_words).generate(text)
     return wordcloud
 
 def main():
@@ -24,9 +24,10 @@ def main():
         # 创建词云图
         wordcloud = create_wordcloud(text_data)
         
-        # 显示词云图
+        # 使用Streamlit的API显示词云图
         st.write("Word Cloud:")
-        plt.imshow(wordcloud, interpolation='bilinear')
+        st.pyplot(plt.figure(figsize=(10, 5)))
+        st.pyplot(plt.imshow(wordcloud, interpolation='bilinear'))
         plt.axis("off")
         plt.show()
 
