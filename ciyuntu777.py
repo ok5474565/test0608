@@ -87,7 +87,7 @@ def generate_word_frequency(words, max_words=50):
 
 # 主函数
 def main():
-    st.title("文本文件词云图生成器")
+    st.title("utf-8专用的文本文件词云图生成器")
     
     # 设置上传文件的按钮
     uploaded_file = st.file_uploader("请上传你的文件 (CSV或TXT)", type=["csv", "txt"])
