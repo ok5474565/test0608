@@ -1,42 +1,75 @@
 import streamlit as st
-import pandas as pd
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-from PIL import ImageFont
 import jieba
+from collections import Counter
+from wordcloud import WordCloud
+import numpy as np
+from PIL import Image
+import pandas as pd
+import csv
 
-def create_wordcloud(text, font_path, max_words=200):
-    # 使用jieba进行中文分词
-    cut_text = ' '.join(jieba.cut(text))
+
+# 辅助函数，用于清理标题中的非法字符
+def sanitize_word(word, illegal_chars):
+    return ''.join([char for char in word if char not in illegal_chars])
+
+# 定义去停用词的函数
+def remove_stopwords(words, stopwords):
+    return [word for word in words if word not in stopwords]
+
+# 生成词云图
+def generate_wordcloud(frequencies, font_path, width=800, height=600):
+    wc = WordCloud(
+        font_path=font_path,
+        background_color='white',
+        max_words=200,
+        width=width,
+        height=height
+    ).generate_from_frequencies(frequencies)
     
-    # 创建词云图，指定中文字体
-    wordcloud = WordCloud(width=1600, height=800, background_color='white', max_words=max_words, font_path=font_path).generate(cut_text)
-    return wordcloud
+    image = wc.to_image()
+    st.image(image, use_column_width=True)
 
+# 读取文件内容
+def read_file(uploaded_file):
+    if uploaded_file.name.endswith('.txt'):
+        text = uploaded_file.read().decode('utf-8')
+    elif uploaded_file.name.endswith('.csv'):
+        reader = csv.reader(uploaded_file)
+        text = '\n'.join([entry[0] for entry in reader])
+    return text
+
+# 主函数
 def main():
-    st.title('CSV to WordCloud App')
+    st.title("文本分词、高频词统计与词云图生成")
     
-    # 文件上传
-    file_uploader = st.file_uploader("Upload a CSV file", type=["csv"])
+    file_types = ["txt", "csv"]
+    uploaded_file = st.file_uploader("请上传你的文本或CSV文件", type=file_types)
     
-    if file_uploader is not None:
-        # 读取CSV文件，假设第一列是文本数据
-        data = pd.read_csv(file_uploader, header=None)  # 没有列名，使用None
+    if uploaded_file is not None:
+        text = read_file(uploaded_file)
         
-        # 提取第一列的文本数据
-        text_data = ' '.join(str(v) for v in data.iloc[:, 0])
+        words = jieba.lcut(text)
         
-        # 指定中文字体路径，这里需要替换为你的字体文件路径
-        font_path = 'path/to/your/chinese_font.ttf'
+        with open('stopwords.txt', 'r', encoding='utf-8') as f:
+            stopwords = f.read().splitlines()
         
-        # 创建词云图
-        wordcloud = create_wordcloud(text_data, font_path)
+        illegal_chars = [':','"','|','/','\\\\','*','<','>','?']
+        sanitized_words = [sanitize_word(word, illegal_chars) for word in words if word]
+        filtered_words = remove_stopwords(sanitized_words, stopwords)
         
-        # 使用Streamlit的API显示词云图
-        fig, ax = plt.subplots(figsize=(20, 10))  # 创建一个新的图形和轴，并设置大小
-        ax.imshow(wordcloud, interpolation='bilinear')
-        ax.axis('off')  # 不显示轴
-        st.pyplot(fig)  # 将图形传递给Streamlit显示
+        word_freq = Counter(filtered_words)
+        
+        top_words = word_freq.most_common(50)
+        
+        wordcloud_freq = {word: freq for word, freq in top_words}
+        
+        font_path = 'simhei.ttf'  # 请确保这个路径是正确的
+        
+        generate_wordcloud(wordcloud_freq, font_path)
+        
+        st.write("高频词统计:")
+        top_words_df = pd.DataFrame(top_words, columns=['Word', 'Frequency'])
+        st.dataframe(top_words_df)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
