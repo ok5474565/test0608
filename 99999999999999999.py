@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from collections import Counter
 import jieba
-from io import TextIOWrapper
+from streamlit.report_thread import get_report_ctx
 
 # 定义去停用词的函数
 def remove_stopwords(words, stopwords_set):
@@ -12,22 +12,22 @@ def remove_stopwords(words, stopwords_set):
 def get_top_words(words, top_k):
     return Counter(words).most_common(top_k)
 
-# 定义读取文件内容的函数，自动识别文件类型和尝试不同的编码
-def read_file(uploaded_file, encoding='utf-8'):
-    comments = None
+# 定义读取文件内容的函数
+def read_file(uploaded_file, file_type, encoding='utf-8'):
+    comments = []
     try:
-        if uploaded_file.name.endswith('.csv'):
-            # 使用TextIOWrapper来读取UploadedFile对象，并指定编码
-            with TextIOWrapper(uploaded_file, encoding=encoding) as f:
-                data = pd.read_csv(f)
-                comments = data.iloc[:, 0]  # 假设第一列是评论文本
-        elif uploaded_file.name.endswith('.txt'):
-            # 使用指定编码读取TXT文件
-            with open(uploaded_file, 'r', encoding=encoding) as file:
-                text = file.read()
-            comments = text.split()  # 假设每行是一个评论
-    except UnicodeDecodeError:
-        st.error(f"文件编码错误，请尝试使用其他编码重新上传文件。")
+        if file_type == 'csv':
+            # 为CSV文件指定正确的编码
+            if encoding == 'gbk':
+                data = pd.read_csv(uploaded_file, encoding='gbk')
+            else:
+                data = pd.read_csv(uploaded_file, encoding='utf-8')
+            comments = data.iloc[:, 0].tolist()  # 假设第一列是评论文本
+        elif file_type == 'txt':
+            # 为TXT文件指定编码
+            with open(uploaded_file, 'r', encoding=encoding) as f:
+                text = f.read()
+            comments = text.split()  # 假设文本中单词之间用空格分隔
     except Exception as e:
         st.error(f"读取文件时发生错误：{e}")
     return comments
@@ -39,22 +39,18 @@ def main():
     uploaded_file = st.file_uploader("请上传你的文件", type=["csv", "txt"])
 
     if uploaded_file is not None:
-        # 尝试使用utf-8编码读取文件
-        comments_utf8 = read_file(uploaded_file, encoding='utf-8')
-        # 如果utf-8读取失败，尝试使用GBK编码读取CSV文件，或ANSI编码读取TXT文件
-        if comments_utf8 is None:
-            if uploaded_file.name.endswith('.csv'):
-                comments_gbk = read_file(uploaded_file, encoding='gbk')
-            else:  # 文件名以.txt结尾
-                comments_ansi = read_file(uploaded_file, encoding='ansi')
-            # 根据文件类型选择正确的读取结果
-            comments = comments_gbk if comments_gbk is not None else comments_ansi
-        else:
-            comments = comments_utf8
+        # 确定文件类型
+        file_type = uploaded_file.name.split('.')[-1]
+        encoding = 'utf-8'  # 默认编码为utf-8
 
-        if comments is None:
+        # 读取文件内容
+        comments = read_file(uploaded_file, file_type, encoding)
+
+        if not comments:
             st.error("文件读取失败，请确保文件格式正确且编码无误。")
             return
+
+
 
         # 以下代码与原代码相同，处理文本、分词、统计高频词等
         words = []
