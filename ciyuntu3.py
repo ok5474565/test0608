@@ -13,21 +13,19 @@ def load_stopwords(filepath):
         stopwords = set(word.strip() for word in file.readlines())
     return stopwords
 
-# 定义去停用词并统计词频的函数
-def get_word_frequencies(text, stopwords_set):
+# 定义去停用词并过滤特殊字符的函数
+def filter_text(text, stopwords_set):
     words = jieba.lcut(text)
     filtered_words = remove_stopwords(words, stopwords_set)
+    # 过滤掉特殊字符
+    filtered_words = [word for word in filtered_words if word.isalnum() and not word.isdigit()]
     word_freq = Counter(filtered_words)
     return word_freq
 
-# 定义去停用词的函数
-def remove_stopwords(words, stopwords_set):
-    return [word for word in words if word not in stopwords_set]
-
 # 定义生成词云图的函数
 def generate_wordcloud(word_freq, font_path, max_words=200):
-    # 将Counter对象转换为字典，用于生成词云
-    word_freq_dict = dict(word_freq)
+    # 选择频率最高的max_words个词
+    top_words = word_freq.most_common(max_words)
     
     # 创建词云对象
     wc = WordCloud(
@@ -36,14 +34,9 @@ def generate_wordcloud(word_freq, font_path, max_words=200):
         max_words=max_words,
         width=800,
         height=600,
-    ).generate_from_frequencies(word_freq_dict)
+    ).generate_from_frequencies(dict(top_words))
     
-    # 显示词云图
     image = wc.to_image()
-    
-    # 获取高频词列表
-    top_words = word_freq.most_common(max_words)
-    
     return image, top_words
 
 # 读取文件内容的函数
