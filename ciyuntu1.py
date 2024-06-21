@@ -15,14 +15,14 @@ def remove_stopwords(words, stopwords):
     return [word for word in words if word not in stopwords]
 
 # 生成词云图
-def generate_wordcloud(frequencies, font_path, width=800, height=600):
+def generate_wordcloud(frequencies, font_path, width=800, height=600, max_length=30):
     wc = WordCloud(
         font_path=font_path,
         background_color='white',
         max_words=200,
         width=width,
         height=height
-    ).generate_from_frequencies(frequencies)
+    ).generate_from_frequencies({word: freq for word, freq in frequencies.items() if len(word) <= max_length})
     
     image = wc.to_image()
     st.image(image, use_column_width=True)
