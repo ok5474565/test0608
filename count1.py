@@ -24,7 +24,7 @@ def main():
         
         # 使用jieba进行分词，合并所有评论文本
         all_comments = ' '.join(str(comment) for comment in data['comment'])
-        words = jieba.lcut(all_comments)
+        words = [word for word in jieba.lcut(all_comments) if word]  # 过滤掉空字符串
         
         # 尝试读取停用词典文件
         try:
