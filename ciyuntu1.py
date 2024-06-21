@@ -58,7 +58,7 @@ def main():
         word_freq = Counter(filtered_words)
 
         # 获取高频词
-        top_words = word_freq.most_common(50)
+        top_words = word_freq.most_common(20)
 
         # 创建词云图的频率字典
         wordcloud_freq = {word: freq for word, freq in top_words}
