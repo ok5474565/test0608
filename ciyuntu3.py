@@ -26,16 +26,24 @@ def remove_stopwords(words, stopwords_set):
 
 # 定义生成词云图的函数
 def generate_wordcloud(word_freq, font_path, max_words=200):
-    top_words = word_freq.most_common(max_words)
+    # 将Counter对象转换为字典，用于生成词云
+    word_freq_dict = dict(word_freq)
+    
+    # 创建词云对象
     wc = WordCloud(
         font_path=font_path,
         background_color='white',
         max_words=max_words,
         width=800,
-        height=600
-    ).generate_from_frequencies(dict(top_words))
+        height=600,
+    ).generate_from_frequencies(word_freq_dict)
     
+    # 显示词云图
     image = wc.to_image()
+    
+    # 获取高频词列表
+    top_words = word_freq.most_common(max_words)
+    
     return image, top_words
 
 # 读取文件内容的函数
