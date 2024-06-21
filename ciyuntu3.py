@@ -69,7 +69,7 @@ def main():
             # 加载停用词典
             stopwords = load_stopwords('stopwords.txt')
             
-            # 统计词频
+            # 统计词频，并将停用词典作为参数传递
             word_freq = get_word_frequencies(text, stopwords)
             
             # 生成词云图和高频词列表
@@ -82,6 +82,9 @@ def main():
             st.write("高频词统计:")
             top_words_df = pd.DataFrame(top_words, columns=['Word', 'Frequency'])
             st.dataframe(top_words_df)
+
+# 确保 load_stopwords 和 get_word_frequencies 函数在这里是可见的
+# 如果它们在其他位置定义，请确保正确导入或定义它们
 
 if __name__ == '__main__':
     main()
