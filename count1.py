@@ -52,8 +52,8 @@ def main():
         # 创建条形图的数据框
         top_words_df = pd.DataFrame(top_words, columns=['Word', 'Frequency'])
         
-        # 反转DataFrame，因为我们想要按降序显示高频词
-        top_words_df = top_words_df.sort_values(by='Frequency', ascending=False)
+        # 按词频降序排列，并重置索引
+        top_words_df = top_words_df.sort_values(by='Frequency', ascending=False).reset_index(drop=True)
         
         # 显示高频词
         st.write("高频词统计结果：")
