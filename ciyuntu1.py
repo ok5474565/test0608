@@ -6,6 +6,7 @@ import numpy as np
 from PIL import Image
 import pandas as pd
 import csv
+import io
 
 
 # 辅助函数，用于清理标题中的非法字符
@@ -32,13 +33,15 @@ def generate_wordcloud(frequencies, font_path, width=800, height=600):
 # 读取文件内容
 def read_file(uploaded_file):
     text = ""
-    if uploaded_file.name.endswith('.txt'):
+    if uploaded_file.type == 'text/plain':
         text = uploaded_file.read().decode('utf-8')
-    elif uploaded_file.name.endswith('.csv'):
-        reader = csv.reader(uploaded_file)
+    elif uploaded_file.type == 'text/csv':
+        # 使用io.StringIO将二进制内容转换为文件对象
+        csv_content = io.StringIO(uploaded_file.read().decode('utf-8'))
+        reader = csv.reader(csv_content)
         for row in reader:
-            # 检查row是否为空或者只包含一个空字符串
-            if row and row[0].strip():
+            # 确保row是非空的
+            if row:
                 text += row[0] + "\n"
     return text
 
