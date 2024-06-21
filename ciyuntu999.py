@@ -10,8 +10,10 @@ import re
 
 # 洗洗
 def clean_text(text):
-    # 使用正则表达式去除非字母数字字符，并替换掉多余的空格和换行符
-    cleaned_text = ' '.join(re.findall(r'\b\w+\b', text)).replace('  ', ' ').strip()
+    # 使用正则表达式替换掉所有非单词字符（包括空格、制表符、换行符等）
+    cleaned_text = re.sub(r'\W+', ' ', text).strip()
+    # 替换掉多个连续的空格为单个空格
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text, flags=re.U).strip()
     return cleaned_text
 
 # 定义加载停用词典的函数
@@ -52,34 +54,36 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 
 # 读取文件内容的函数
-def read_file(file, file_type):
+def read_file(uploaded_file, file_type):
     text = None
     common_encodings = ['utf-8', 'GBK', 'ISO-8859-1', 'Windows-1252', 'big5', 'latin1']
     
     for encoding in common_encodings:
         try:
+            content = uploaded_file.read().decode(encoding)
             if file_type == '.csv':
-                # 尝试使用当前编码读取CSV文件
-                data = pd.read_csv(file, header=None, encoding=encoding)
-                # 去除每行末尾的换行符，并将所有行的数据合并为一个字符串
-                text = ' '.join(str(row[0]).rstrip() for row in data.values)  # 假设我们只关心第一列
-                break  # 如果成功读取，跳出循环
+                # 由于CSV文件可能包含多个列，这里我们假设只读取第一列
+                data = pd.read_csv(io.StringIO(content), header=None)
+                text = ' '.join(str(row[0]).strip() for row in data.values if row[0].strip())
             elif file_type == '.txt':
-                # 尝试使用当前编码读取TXT文件
-                with open(file.name, 'r', encoding=encoding) as f:
-                    text = ' '.join(line.rstrip() for line in f)
-                break  # 如果成功读取，跳出循环
+                text = clean_text(content)
+            if text:
+                break
         except UnicodeDecodeError:
-            continue  # 如果解码错误，尝试下一个编码格式
-
-    if text is None:
+            continue
+        except Exception as e:
+            st.error(f"读取文件时发生错误：{e}")
+    
+    if not text:
         st.error("无法读取文件，请检查文件格式或编码。")
-
+    
     return text
 
 def clean_text(text):
-    # 使用正则表达式去除非字母数字字符，并替换掉多余的空格和换行符
-    cleaned_text = ' '.join(re.findall(r'\b\w+\b', text)).replace('  ', ' ').strip()
+    # 使用正则表达式替换掉所有非单词字符（包括空格、制表符、换行符等）
+    cleaned_text = re.sub(r'\W+', ' ', text).strip()
+    # 替换掉多个连续的空格为单个空格
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text, flags=re.U).strip()
     return cleaned_text
 
 # 定义生成词频统计的函数
@@ -99,8 +103,7 @@ def main():
     
     if uploaded_file is not None:
         # 获取文件扩展名
-        file_type = os.path.splitext(uploaded_file.name)[1].lower()
-        
+        file_type = uploaded_file.name.split('.')[-1].lower()
         # 读取文件内容，自动尝试不同的编码格式
         text = read_file(uploaded_file, file_type)
         
