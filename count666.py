@@ -14,7 +14,7 @@ def get_top_words(words, top_k):
 
 # 读取文件内容的函数
 def read_file(file, file_type, encoding='utf-8'):
-    data = None
+    comments = None  # 确保初始化comments变量
     try:
         if file_type == '.csv':
             data = pd.read_csv(file, header=None, encoding=encoding)
@@ -23,6 +23,7 @@ def read_file(file, file_type, encoding='utf-8'):
             comments = file.read().decode(encoding)
     except Exception as e:
         st.error(f"读取文件时发生错误：{e}")
+        return None  # 添加返回值以处理错误情况
     return comments
 
 # 主函数
