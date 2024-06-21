@@ -53,30 +53,28 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 # 读取文件内容的函数
 def read_file(file, file_type):
-    text = None  # 初始化text变量
-    try:
-        if file_type == '.csv':
-            encodings = ['utf-8', 'gbk', 'windows-1252', 'iso-8859-1', 'ascii', 'big5', 'euc-kr', 'shift_jis']
-            for enc in encodings:
-                try:
-                    data = pd.read_csv(file, header=None, encoding=enc)
-                    text = ' '.join(str(row[0]) for row in data.values)  # 假设我们只关心第一列
-                    break  # 如果成功读取，跳出循环
-                except UnicodeDecodeError:
-                    continue
-        elif file_type == '.txt':
-            encodings = ['utf-8', 'gbk', 'windows-1252', 'iso-8859-1', 'ascii', 'big5', 'euc-kr', 'shift_jis']
-            for enc in encodings:
-                try:
-                    file.seek(0)  # 重置文件指针到文件开头
-                    text = file.read().decode(enc)
-                    # 清洗文本
-                    text = clean_text(text)
-                    break  # 如果成功读取，跳出循环
-                except (UnicodeDecodeError, LookupError):
-                    continue
-    except Exception as e:
-        st.error(f"读取文件时发生错误：{e}")
+    text = None
+    common_encodings = ['utf-8', 'GBK', 'ISO-8859-1', 'Windows-1252', 'big5', 'latin1']
+    
+    for encoding in common_encodings:
+        try:
+            if file_type == '.csv':
+                # 尝试使用当前编码读取CSV文件
+                data = pd.read_csv(file, header=None, encoding=encoding)
+                # 去除每行末尾的换行符，并将所有行的数据合并为一个字符串
+                text = ' '.join(str(row[0]).rstrip() for row in data.values)  # 假设我们只关心第一列
+                break  # 如果成功读取，跳出循环
+            elif file_type == '.txt':
+                # 尝试使用当前编码读取TXT文件
+                with open(file.name, 'r', encoding=encoding) as f:
+                    text = ' '.join(line.rstrip() for line in f)
+                break  # 如果成功读取，跳出循环
+        except UnicodeDecodeError:
+            continue  # 如果解码错误，尝试下一个编码格式
+
+    if text is None:
+        st.error("无法读取文件，请检查文件格式或编码。")
+
     return text
 
 def clean_text(text):
@@ -103,7 +101,7 @@ def main():
         # 获取文件扩展名
         file_type = os.path.splitext(uploaded_file.name)[1].lower()
         
-        # 读取文件内容
+        # 读取文件内容，自动尝试不同的编码格式
         text = read_file(uploaded_file, file_type)
         
         if text is not None:
