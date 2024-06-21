@@ -6,6 +6,8 @@ import numpy as np
 from PIL import Image
 import pandas as pd
 
+st.audio("1132983854.mp3", format="audio/mp3")
+
 # 辅助函数，用于清理标题中的非法字符
 def sanitize_word(word, illegal_chars):
     return ''.join([char for char in word if char not in illegal_chars])
@@ -16,29 +18,27 @@ def remove_stopwords(words, stopwords):
 
 # 生成词云图
 def generate_wordcloud(frequencies, font_path, width=800, height=600):
-    # 创建词云对象
     wc = WordCloud(
         font_path=font_path,
         background_color='white',
         max_words=200,
-        width=width,  # 设置词云图的宽度
-        height=height  # 设置词云图的高度
+        width=width,
+        height=height
     ).generate_from_frequencies(frequencies)
-    
-    # 显示词云图
+
     image = wc.to_image()
-    st.image(image, use_column_width=True)  # 根据需要调整图像大小
+    st.image(image, use_column_width=True)
 
 # 主函数
 def main():
-    st.title("评论文本分词、高频词统计与词云图生成")
-
+    st.title("文本分词、高频词统计与词云图生成")
+    
     # 设置上传文件的按钮，接受CSV文件
     uploaded_file = st.file_uploader("请上传你的CSV文件", type=["csv"])
-
+    
     if uploaded_file is not None:
-        # 读取CSV文件，假设没有列名，每一行是一个评论
-        data = pd.read_csv(uploaded_file, header=None)
+        # 读取CSV文件，假设第一列是评论文本
+        data = pd.read_csv(uploaded_file, header=None)  # 假设CSV没有列名
         comments = data.iloc[:, 0].astype(str)  # 确保是字符串格式
 
         # 使用jieba进行分词
