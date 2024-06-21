@@ -33,7 +33,7 @@ def read_csv_file(uploaded_file, encoding):
         return None
 
 def main():
-    st.title("文本分词与词云图生成")
+    st.title("在线文本分词与词云图生成小程序")
 
     # 第一个下拉选项：选择文件类型
     file_type = st.selectbox(
