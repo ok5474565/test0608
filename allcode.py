@@ -25,7 +25,7 @@ function_options = [
     "文本简要总结",
     "输入链接爬取内容统计词频条形图",
     "输入链接爬取内容生成词云图",
-    "读取GBK CSV生成条形图",  # 新增选项：count1.py
+    "读取UTF-8 CSV生成条形图",  # 新增选项：count1.py
     "读取GBK CSV生成词云图",  # 新增选项：ciyuntu3.py
     "读取UTF-8 CSV生成词云图"  # 新增选项：ciyuntu777.py
 ]
@@ -48,7 +48,7 @@ elif selected_option == "输入链接爬取内容统计词频条形图":
     bar_chart_run()
 elif selected_option == "输入链接爬取内容生成词云图":
     wordcloud_run()
-elif selected_option == "读取GBK CSV生成条形图":  # 新增选项的处理逻辑
+elif selected_option == "读取UTF-8 CSV生成条形图":  # 新增选项的处理逻辑
     count1_main()
 elif selected_option == "读取GBK CSV生成词云图":  # 新增选项的处理逻辑
     ciyuntu3_main()
