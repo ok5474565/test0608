@@ -43,33 +43,20 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 # 读取文件内容的函数
 def read_file(uploaded_file, file_type):
-    text = None  # 初始化text变量
-    common_encodings = ['utf-8', 'gbk', 'gb2312', 'big5', 'iso-8859-1']  # 常见的编码格式列表
-    for encoding in common_encodings:
+    text = None
+    for encoding in ['gbk', 'utf-8']:  # 尝试GBK和UTF-8编码
         try:
             if file_type == '.csv':
-                # 尝试使用指定编码和python引擎读取CSV文件
-                data = pd.read_csv(uploaded_file, header=None, engine='python', encoding=encoding)
-                if data.empty:
-                    st.error("CSV文件是空的，或者文件格式不正确，没有数据可以解析。")
-                    continue
-                # 检查是否有数据列，并将其转换为字符串列表
-                if data.shape[1] == 1:
-                    text = ' '.join(str(row).rstrip() for row in data.iloc[:, 0].tolist())
-                else:
-                    st.error("CSV文件包含多列数据，当前只处理单列数据。")
-                    continue
+                data = pd.read_csv(uploaded_file, header=None, encoding=encoding)
+                if not data.empty:
+                    text = ' '.join(str(row[0]) for row in data.values)  # 假设只关心第一列
             elif file_type == '.txt':
-                # 使用指定编码读取TXT文件
                 text = uploaded_file.read().decode(encoding)
-                text = text.replace('\r\n', ' ').replace('\n', ' ')  # 替换换行符为空白字符
-            if text is not None:
-                break  # 如果成功读取文件，则跳出循环
-        except UnicodeDecodeError:
-            continue  # 如果编码错误，继续尝试下一个编码
         except Exception as e:
             st.error(f"读取文件时发生错误：{e}")
-            break  # 如果发生其他错误，跳出循环
+            continue
+        else:
+            break
     return text
 
 # 定义去停用词的函数
