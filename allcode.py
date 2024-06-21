@@ -4,9 +4,9 @@ import streamlit as st
 from newspachong666 import main as news_crawl_main
 from count import main as count_main
 from ciyuntu import main as ciyuntu_main
-from app_bar2 import run as bar_chart_run  # 假设 run 函数是条形图的主函数
-from app_abstract import main as summary_main  # 假设 main 函数是摘要的主函数
-from app_worldcloud import run as wordcloud_run  # 假设 run 函数是词云图的主函数
+from app_bar2 import run as bar_chart_run  
+from app_abstract import main as summary_main  
+from app_worldcloud import run as wordcloud_run  
 from count1 import main as count1_main  # 新增：读取CSV生成条形图
 from ciyuntu3 import main as ciyuntu3_main  # 新增：读取GBK CSV生成词云图
 from ciyuntu777 import main as ciyuntu777_main  # 新增：读取UTF-8 CSV生成词云图
