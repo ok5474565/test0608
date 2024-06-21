@@ -94,7 +94,7 @@ def main():
     top_words = get_top_words(filtered_words, top_k)
 
     # 创建词云
-    wc = WordCloud(font_path='simhei.ttf', max_words=max_frequency, background_color='white')
+    wc = WordCloud(font_path='simhei.ttf', max_words=max_frequency, background_color='white', width=1200, height=800)
     word_freq = {word: freq for word, freq in top_words}
     wc.generate_from_frequencies(word_freq)
 
