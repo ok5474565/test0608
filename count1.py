@@ -20,12 +20,19 @@ def main():
     
     if uploaded_file is not None:
         # 读取CSV文件，假设第一列是评论文本
-        data = pd.read_csv(uploaded_file, header=None, names=['comment'])
-        
-        # 使用jieba进行分词，合并所有评论文本
-        all_comments = ' '.join(str(comment) for comment in data['comment'])
-        words = [word for word in jieba.lcut(all_comments) if word]  # 过滤掉空字符串
-        
+        data = pd.read_csv(uploaded_file, header=None, encoding='utf-8')
+        comments = data.iloc[:, 0]  # 获取评论文本列
+
+        # 使用jieba进行分词，合并所有评论文本，并移除每条评论的前后空白字符
+        words = []
+        for comment in comments:
+            comment_stripped = comment.strip()  # 移除首尾空白字符
+            comment_words = jieba.lcut(comment_stripped)
+            words.extend(comment_words)
+
+        # 过滤掉空字符串和长度为1的单字符（通常是标点符号或特殊字符）
+        words = [word for word in words if word and len(word) > 1]
+
         # 尝试读取停用词典文件
         try:
             with open('stopwords.txt', encoding='utf-8') as f:
