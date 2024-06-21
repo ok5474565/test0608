@@ -12,16 +12,15 @@ def get_top_words(words, top_k):
     return Counter(words).most_common(top_k)
 
 # 定义读取文件内容的函数
-def read_file(uploaded_file, encoding='utf-8'):
+def read_file(file, file_type, encoding):
     try:
-        if uploaded_file.name.endswith('.csv'):
-            data = pd.read_csv(uploaded_file, encoding=encoding)
-            comments = data.iloc[:, 0].tolist()  # 假设第一列是评论文本
-        elif uploaded_file.name.endswith('.txt'):
-            with open(uploaded_file, 'r', encoding=encoding) as f:
+        if file_type == 'csv':
+            data = pd.read_csv(file, header=None, encoding=encoding)
+            return [data.iloc[:, 0].tolist()]  # 假设CSV文件只有一列评论
+        elif file_type == 'txt':
+            with open(file, 'r', encoding=encoding) as f:
                 text = f.read()
-            comments = text.split()  # 假设文本中单词之间用空格分隔
-        return comments
+            return text.split()  # 假设TXT文件中的单词以空格分隔
     except Exception as e:
         st.error(f"读取文件时发生错误：{e}")
         return None
@@ -29,19 +28,31 @@ def read_file(uploaded_file, encoding='utf-8'):
 def main():
     st.title("文本分词与高频词统计")
 
-    # 设置上传文件的按钮，接受CSV和TXT文件
-    uploaded_file = st.file_uploader("请上传你的文件", type=["csv", "txt"])
+    # 第一个下拉选项：选择文件类型
+    file_type = st.selectbox(
+        "请选择文件类型",
+        ["txt", "csv"]
+    )
+
+    # 根据选择的文件类型，设置第二个下拉选项的选项内容
+    if file_type == "txt":
+        encoding_options = ["utf-8", "ANSI"]
+    else:  # file_type == "csv"
+        encoding_options = ["utf-8", "gbk"]
+
+    encoding_type = st.selectbox(
+        "请选择文件编码",
+        encoding_options
+    )
+
+    # 设置上传文件的按钮
+    uploaded_file = st.file_uploader("请上传你的文件", type=[file_type])
 
     if uploaded_file is not None:
-        # 尝试使用utf-8编码读取文件
-        comments = read_file(uploaded_file, encoding='utf-8')
-
+        # 读取文件内容
+        comments = read_file(uploaded_file, file_type, encoding_type)
         if comments is None:
-            # 如果utf-8读取失败，尝试使用GBK编码读取CSV文件，或ANSI编码读取TXT文件
-            comments = read_file(uploaded_file, encoding='gbk') if uploaded_file.name.endswith('.csv') else None
-
-        if comments is None:
-            st.error("文件读取失败，请确保文件格式正确且编码无误。")
+            st.error("文件读取失败，请检查文件和编码格式。")
             return
 
 
