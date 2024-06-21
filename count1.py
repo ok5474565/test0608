@@ -23,14 +23,18 @@ def main():
         data = pd.read_csv(uploaded_file, header=None, names=['comment'])
         
         # 使用jieba进行分词，合并所有评论文本
-        all_comments = ' '.join(data['comment'].astype(str))
+        all_comments = ' '.join(str(comment) for comment in data['comment'])
         words = jieba.lcut(all_comments)
         
-        # 读取停用词典文件
-        with open('stopwords.txt', 'encoding="utf-8"') as f:
-            stopwords = f.read()
-            stopwords_set = set(stopwords.splitlines())
-
+        # 尝试读取停用词典文件
+        try:
+            with open('stopwords.txt', encoding='utf-8') as f:
+                stopwords = f.read()
+                stopwords_set = set(stopwords.splitlines())
+        except FileNotFoundError:
+            st.error("停用词典文件 'stopwords.txt' 未找到，请确保文件存在于同一目录下。")
+            return
+        
         # 去除停用词
         filtered_words = remove_stopwords(words, stopwords_set)
         
