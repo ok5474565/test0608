@@ -59,7 +59,7 @@ def read_file(file, file_type):
 
 # 主函数
 def main():
-    st.title("文本文件词云图生成器")
+    st.title("GBK专用的文本文件词云图生成器")
     
     # 设置上传文件的按钮
     uploaded_file = st.file_uploader("请上传你的文件 (CSV或TXT)", type=["csv", "txt"])
