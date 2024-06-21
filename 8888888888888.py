@@ -73,17 +73,22 @@ def main():
         # 过滤掉空字符串和长度为1的单字符（通常是标点符号或特殊字符）
         words = [word for word in words if len(word) > 1]
 
-        # 尝试读取停用词典文件
-        try:
-            with open('stopwords.txt', encoding='utf-8') as f:
-                stopwords = f.read()
-                stopwords_set = set(stopwords.splitlines())
-        except FileNotFoundError:
-            st.error("停用词典文件 'stopwords.txt' 未找到，请确保文件存在于同一目录下。")
-            return
+    # 尝试读取停用词典文件
+    try:
+        with open('stopwords.txt', encoding='utf-8') as f:
+            stopwords = f.read()
+            stopwords_set = set(stopwords.splitlines())
+    except FileNotFoundError:
+        st.error("停用词典文件 'stopwords.txt' 未找到，请确保文件存在于同一目录下。")
+        return
 
-        # 去除停用词
-        filtered_words = remove_stopwords(words, stopwords_set)
+    # 去除停用词
+    filtered_words = remove_stopwords(words, stopwords_set)
+
+    # 确保 filtered_words 不是 None
+    if filtered_words is None:
+        st.error("处理文本时发生错误，未能生成词云。")
+        return
 
     # 设置要显示的词云词数量
     min_frequency = 30  # 词频最低阈值
