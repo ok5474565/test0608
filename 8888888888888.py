@@ -3,6 +3,7 @@ import pandas as pd
 from collections import Counter
 import jieba
 from wordcloud import WordCloud
+import os
 
 # 定义去停用词的函数
 def remove_stopwords(words, stopwords_set):
@@ -41,16 +42,13 @@ def main():
     )
 
     # 根据选择的文件类型，设置第二个下拉选项的选项内容
-    if file_type == "txt":
-        encoding_options = ["utf-8", "ANSI"]
-    else:  # file_type == "csv"
-        encoding_options = ["utf-8", "gbk"]
-
-    selected_encoding = st.selectbox("请选择文件编码", encoding_options)
+    encoding_options = {"txt": ["utf-8", "ANSI"], "csv": ["utf-8", "gbk"]}
+    selected_encoding = st.selectbox("请选择文件编码", encoding_options[file_type])
 
     # 设置上传文件的按钮
     uploaded_file = st.file_uploader("请上传你的文件", type=[file_type])
 
+    words = []
     if uploaded_file is not None:
         # 根据文件类型读取文件内容
         if file_type == 'txt':
@@ -61,17 +59,15 @@ def main():
         if comments is None:
             return  # 如果文件读取失败，不执行后续操作
 
-
-        # 以下代码与原代码相同，处理文本、分词、统计高频词等
-        words = []
+        # 处理文本、分词
         for comment in comments:
             comment_stripped = comment.strip()  # 移除首尾空白字符
             if comment_stripped:  # 确保不处理空字符串
                 comment_words = jieba.lcut(comment_stripped)
                 words.extend(comment_words)
 
-        # 过滤掉空字符串和长度为1的单字符（通常是标点符号或特殊字符）
-        words = [word for word in words if len(word) > 1]
+    # 过滤掉空字符串和长度为1的单字符（通常是标点符号或特殊字符）
+    words = [word for word in words if len(word) > 1]
 
     # 尝试读取停用词典文件
     try:
@@ -85,9 +81,9 @@ def main():
     # 去除停用词
     filtered_words = remove_stopwords(words, stopwords_set)
 
-    # 确保 filtered_words 不是 None
-    if filtered_words is None:
-        st.error("处理文本时发生错误，未能生成词云。")
+    # 检查 filtered_words 是否为空
+    if not filtered_words:
+        st.error("没有有效的词可以生成词云。")
         return
 
     # 设置要显示的词云词数量
@@ -97,15 +93,14 @@ def main():
     top_k = st.sidebar.slider("选择要显示的词数量", min_frequency, max_frequency, default_top_k)
     top_words = get_top_words(filtered_words, top_k)
 
-    # 过滤掉频率低于设定阈值的词
-    filtered_words = [word for word, freq in top_words if freq >= min_frequency]
-
     # 创建词云
-    wordcloud = WordCloud(font_path=font_path).generate_from_frequencies(dict(filtered_words))
+    wc = WordCloud(font_path='simhei.ttf', max_words=max_frequency, background_color='white')
+    word_freq = {word: freq for word, freq in top_words}
+    wc.generate_from_frequencies(word_freq)
 
     # 显示词云图
     st.write("生成的词云图：")
-    st.image(wordcloud.to_image(), use_column_width=True)
+    st.image(wc, use_column_width=True)
 
 if __name__ == '__main__':
     main()
