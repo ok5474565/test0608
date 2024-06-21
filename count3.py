@@ -26,7 +26,7 @@ def read_txt_file(uploaded_file, encoding='utf-8'):
 
 # 修改main函数以增加对TXT文件的支持
 def main():
-    st.title("评论文本分词与高频词统计")
+    st.title("GBK专用的评论文本分词与高频词统计")
 
     # 设置上传文件的按钮，接受CSV和TXT文件
     file_type = st.selectbox(
