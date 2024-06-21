@@ -5,8 +5,8 @@ from newspachong666 import main as news_crawl_main
 from app_abstract import main as summary_main  
 from app_bar2 import run as bar_chart_run  
 from app_worldcloud import run as wordcloud_run  
-from 99999999999999999 import main as text_analysis_main  # 假设主函数名为main
-from 8888888888888 import main as wordcloud_main  # 假设主函数名为main
+from tiaoxingtuend import main as text_analysis_main  # 假设主函数名为main
+from ciyuntuend import main as wordcloud_main  # 假设主函数名为main
 
 from count import main as count_main
 from ciyuntu import main as ciyuntu_main
