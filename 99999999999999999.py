@@ -11,21 +11,25 @@ def remove_stopwords(words, stopwords_set):
 def get_top_words(words, top_k):
     return Counter(words).most_common(top_k)
 
-# 定义读取文件内容的函数
-def read_file(uploaded_file, encoding):
+# 定义读取TXT文件内容的函数
+def read_txt_file(uploaded_file, encoding):
     try:
-        # 读取CSV文件
-        if uploaded_file.name.endswith('.csv'):
-            data = pd.read_csv(uploaded_file, encoding=encoding)
-            comments = [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设第一列是评论文本
-        # 读取TXT文件
-        elif uploaded_file.name.endswith('.txt'):
-            with open(uploaded_file, 'r', encoding=encoding) as f:
-                text = f.read()
-            comments = text.split()  # 假设TXT文件中的单词以空格分隔
-        return comments
+        # 使用Streamlit提供的API读取文本内容
+        text = uploaded_file.read().decode(encoding)
+        # 替换换行符为空白字符
+        text = text.replace('\r\n', ' ').replace('\n', ' ')
+        return text.split()  # 假设TXT文件中的单词以空格分隔
     except Exception as e:
-        st.error(f"读取文件时发生错误：{e}")
+        st.error(f"读取TXT文件时发生错误：{e}")
+        return None
+
+# 定义读取CSV文件内容的函数
+def read_csv_file(uploaded_file, encoding):
+    try:
+        data = pd.read_csv(uploaded_file, encoding=encoding)
+        return [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设CSV文件只有一列评论
+    except Exception as e:
+        st.error(f"读取CSV文件时发生错误：{e}")
         return None
 
 def main():
@@ -40,19 +44,24 @@ def main():
     # 根据选择的文件类型，设置第二个下拉选项的选项内容
     if file_type == "txt":
         encoding_options = ["utf-8", "ANSI"]
-        selected_encoding = st.selectbox("请选择TXT文件编码", encoding_options)
     else:  # file_type == "csv"
         encoding_options = ["utf-8", "gbk"]
-        selected_encoding = st.selectbox("请选择CSV文件编码", encoding_options)
+
+    selected_encoding = st.selectbox("请选择文件编码", encoding_options)
 
     # 设置上传文件的按钮
     uploaded_file = st.file_uploader("请上传你的文件", type=[file_type])
 
     if uploaded_file is not None:
-        # 读取文件内容
-        comments = read_file(uploaded_file, selected_encoding)
+        # 根据文件类型读取文件内容
+        if file_type == 'txt':
+            comments = read_txt_file(uploaded_file, selected_encoding)
+        else:  # file_type == 'csv'
+            comments = read_csv_file(uploaded_file, selected_encoding)
+
         if comments is None:
             return  # 如果文件读取失败，不执行后续操作
+
 
 
 
