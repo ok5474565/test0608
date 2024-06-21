@@ -43,22 +43,18 @@ def generate_wordcloud(text, font_path, max_words=200):
 
 # 读取文件内容的函数
 def read_file(file, file_type):
-    if file_type == 'csv':
-        try:
+    text = None  # 初始化text变量
+    try:
+        if file_type == '.csv':
             # 尝试使用GBK编码读取CSV文件
             data = pd.read_csv(file, header=None, encoding='GBK')
             # 将所有行的数据合并为一个字符串
             text = ' '.join(str(row[0]) for row in data.values)  # 假设我们只关心第一列
-        except Exception as e:
-            st.error(f"读取CSV文件时发生错误：{e}")
-            return None
-    elif file_type == 'txt':
-        try:
+        elif file_type == '.txt':
             # 使用utf-8编码读取TXT文件
             text = file.read().decode('utf-8')
-        except Exception as e:
-            st.error(f"读取TXT文件时发生错误：{e}")
-            return None
+    except Exception as e:
+        st.error(f"读取文件时发生错误：{e}")
     return text
 
 # 主函数
