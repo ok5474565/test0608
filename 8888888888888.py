@@ -103,7 +103,7 @@ def main():
 
     # 显示词云图
     st.write("生成的词云图：")
-    st.image(pil_image, use_column_width=True)
+    st.image(pil_image, use_column_width=True, caption='词云图')
 
 if __name__ == '__main__':
     main()
