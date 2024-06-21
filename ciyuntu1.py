@@ -33,7 +33,13 @@ def main():
     
     if uploaded_file is not None:
         # 读取CSV文件内容
-        data = pd.read_csv(uploaded_file, header=None)  # 假设没有列名
+        try:
+            # 尝试使用GBK编码读取文件
+            data = pd.read_csv(uploaded_file, header=None, encoding='GBK')
+        except Exception as e:
+            # 如果发生错误，打印错误信息并返回
+            st.error(f"读取文件时发生错误：{e}")
+            return
         
         # 将所有行的数据合并为一个字符串
         all_text = ' '.join(str(row[0]) for row in data.values)  # 假设我们只关心第一列
