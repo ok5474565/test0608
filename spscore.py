@@ -19,14 +19,15 @@ def main():
     uploaded_file = st.file_uploader("Please upload your score statistics table (.xlsx)")
     if uploaded_file is not None:
         # 读取Excel文件
-        data = pd.read_excel(uploaded_file)
+        data = pd.read_excel(uploaded_file, index_col=0)
 
         # 学生姓名和题目号码
-        students = data.columns[1:]  # 假设第一列除了标题外都是学生姓名
-        problems = data.index[1:]   # 假设第一行除了标题外都是题目号码
+        students = data.columns  # 假设第一列是学生姓名
+        problems = data.index[:-1]  # 假设除了最后一行外都是题目号码
 
         # 构建DataFrame，排除标题"对象"
-        scores = data.loc[1:, 1:].astype(int)
+        # 从第二行开始选择数据，避免标题"对象"
+        scores = data.iloc[1:-1].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
