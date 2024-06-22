@@ -1,76 +1,72 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import streamlit as st
 
-def load_data(file):
-    df = pd.read_excel(file, index_col=0)
-    return df
+# Function to calculate covariance for sorting
+def calculate_covariance(student_scores, problem_scores):
+    return np.cov(student_scores, problem_scores)[0, 1]
 
-def process_data(df):
-    # 计算学生总分
-    df[\'总分\'] = df.sum(axis=1)
-    # 按照总分排序学生
-    df = df.sort_values(by=\'总分\', ascending=False)
+# Function to load and process the data
+def process_sp_chart(file):
+    df = pd.read_excel(file, header=0, index_col=0)
     
-    # 计算每个题目的总分
-    total_scores = df.drop(columns=[\'总分\']).sum(axis=0)
-    # 按照总分排序题目
-    df = df[total_scores.sort_values(ascending=False).index]
-    df = df.join(df.pop(\'总分\'))
+    # Extracting student names and problem names
+    student_names = df.index.tolist()
+    problem_names = df.columns.tolist()
     
-    return df
+    # Calculating student scores and problem scores
+    student_scores = df.sum(axis=1)
+    problem_scores = df.sum(axis=0)
+    
+    # Sorting students by total score, then by covariance if scores are the same
+    sorted_students = student_scores.sort_values(ascending=False).index.tolist()
+    for i in range(len(sorted_students) - 1):
+        for j in range(i + 1, len(sorted_students)):
+            if student_scores[sorted_students[i]] == student_scores[sorted_students[j]]:
+                cov_i = calculate_covariance(df.loc[sorted_students[i]], problem_scores)
+                cov_j = calculate_covariance(df.loc[sorted_students[j]], problem_scores)
+                if cov_i < cov_j:
+                    sorted_students[i], sorted_students[j] = sorted_students[j], sorted_students[i]
+    
+    # Sorting problems by total score, then by covariance if scores are the same
+    sorted_problems = problem_scores.sort_values(ascending=False).index.tolist()
+    for i in range(len(sorted_problems) - 1):
+        for j in range(i + 1, len(sorted_problems)):
+            if problem_scores[sorted_problems[i]] == problem_scores[sorted_problems[j]]:
+                cov_i = calculate_covariance(df[sorted_problems[i]], student_scores)
+                cov_j = calculate_covariance(df[sorted_problems[j]], student_scores)
+                if cov_i < cov_j:
+                    sorted_problems[i], sorted_problems[j] = sorted_problems[j], sorted_problems[i]
 
-def plot_sp_curves(df):
-    students = df.index
-    problems = df.columns[:-1]
-    student_scores = df[\'总分\']
+    # Generating the sorted S-P table
+    sorted_df = df.loc[sorted_students, sorted_problems]
     
-    fig, ax = plt.subplots(2, 1, figsize=(12, 8))
+    # Adding sorted student and problem names back to the table
+    sorted_df.index.name = df.index.name
+    sorted_df.columns.name = df.columns.name
     
-    # 绘制S曲线
-    for i, student in enumerate(students):
-        score = student_scores[student]
-        ax[0].vlines(i, 0, score, color=\'b\')
-        for j in range(score):
-            ax[0].hlines(j, i, i+1, color=\'b\')
-    
-    ax[0].set_title(\'S曲线\')
-    ax[0].set_xlabel(\'学生\')
-    ax[0].set_ylabel(\'得分\')
-    ax[0].set_xticks(range(len(students)))
-    ax[0].set_xticklabels(students, rotation=90)
-    
-    # 绘制P曲线
-    for i, problem in enumerate(problems):
-        correct_answers = df[problem].sum()
-        ax[1].hlines(i, 0, correct_answers, color=\'r\')
-        for j in range(correct_answers):
-            ax[1].vlines(j, i, i+1, color=\'r\')
-    
-    ax[1].set_title(\'P曲线\')
-    ax[1].set_xlabel(\'题目\')
-    ax[1].set_ylabel(\'正答次数\')
-    ax[1].set_yticks(range(len(problems)))
-    ax[1].set_yticklabels(problems)
-    
-    st.pyplot(fig)
+    return sorted_df, sorted_students, sorted_problems
 
-def main():
-    st.title(\"S-P 表格及曲线生成器\")
-    
-    uploaded_file = st.file_uploader(\"上传一个xlsx文件\", type=\"xlsx\")
-    
-    if uploaded_file is not None:
-        df = load_data(uploaded_file)
-        st.write(\"原始数据：\")
-        st.dataframe(df)
-        
-        processed_df = process_data(df)
-        st.write(\"处理后的数据：\")
-        st.dataframe(processed_df)
-        
-        plot_sp_curves(processed_df)
+# Streamlit app
+st.title(\"S-P 表格生成器\")
 
-if __name__ == \"__main__\":
-    main()
+uploaded_file = st.file_uploader(\"上传Excel文件\", type=[\"xlsx\"])
+
+if uploaded_file is not None:
+    st.write(\"上传成功！\")
+    sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
+    
+    st.write(\"生成的S-P表格：\")
+    st.dataframe(sorted_df)
+    
+    # Option to download the sorted S-P table
+    st.write(\"下载S-P表格：\")
+    sorted_df.to_excel(\"sorted_sp_chart.xlsx\")
+    with open(\"sorted_sp_chart.xlsx\", \"rb\") as file:
+        btn = st.download_button(
+            label=\"下载Excel文件\",
+            data=file,
+            file_name=\"sorted_sp_chart.xlsx\",
+            mime=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"
+        )
+
