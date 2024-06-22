@@ -43,8 +43,10 @@ def main():
 
 def plot_sp_curve(data, problems):
     plt.figure(figsize=(10, 6))
-    for problem in problems:
-        scores = data[data.index.str.contains(problem)]
+    for idx, problem in enumerate(problems, start=1):  # 假设问题编号从1开始
+        # 假设问题编号是以字符串形式存储在第一行的
+        # 我们通过问题编号的索引来选择列
+        scores = data.iloc[:, idx-1]  # 减1是因为索引是从0开始的
         plt.plot(scores, label=problem)
     plt.title('S-P Curve')
     plt.xlabel('学生')
