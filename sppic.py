@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+from streamlit_echarts import st_echarts
 
 # 上传文件
 uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx", "csv"])
@@ -28,24 +28,48 @@ if uploaded_file is not None:
     # 计算每个问题的正答次数（P曲线）
     p_curve = df_transposed.mean(axis=1).sort_values(ascending=True)
 
-    # 绘制 S 曲线和 P 曲线
-    plt.figure(figsize=(12, 8))
+    # 准备 S 曲线数据
+    s_curve_data = [{'value': val, 'name': idx} for idx, val in enumerate(s_curve.values)]
+    s_curve_normalized_index = list(range(len(s_curve)))
 
-    # 正规化索引
-    s_curve_normalized_index = range(len(s_curve))
-    p_curve_normalized_index = range(len(p_curve))
+    # 准备 P 曲线数据
+    p_curve_data = [{'value': val, 'name': idx} for idx, val in enumerate(p_curve.values)]
+    p_curve_normalized_index = list(range(len(p_curve)))
 
-    # 绘制 S 曲线（虚线）
-    plt.plot(s_curve_normalized_index, s_curve.values, 'r--', label='S 曲线 - 学生表现')
-
-    # 绘制 P 曲线（实线）
-    plt.plot(p_curve_normalized_index, p_curve.values, 'b-', label='P 曲线 - 题目难度')
-
-    plt.title('综合 S 和 P 曲线')
-    plt.xlabel('索引')
-    plt.ylabel('百分比')
-    plt.legend()
-    plt.tight_layout()
+    # 配置 S 曲线和 P 曲线的选项
+    options = {
+        "title": {
+            "text": "综合 S 和 P 曲线"
+        },
+        "tooltip": {
+            "trigger": "axis"
+        },
+        "legend": {
+            "data": ["S 曲线 - 学生表现", "P 曲线 - 题目难度"]
+        },
+        "xAxis": {
+            "type": "category",
+            "data": s_curve_normalized_index
+        },
+        "yAxis": {
+            "type": "value"
+        },
+        "series": [
+            {
+                "name": "S 曲线 - 学生表现",
+                "type": "line",
+                "data": s_curve_data,
+                "lineStyle": {
+                    "type": "dashed"
+                }
+            },
+            {
+                "name": "P 曲线 - 题目难度",
+                "type": "line",
+                "data": p_curve_data
+            }
+        ]
+    }
 
     # 展示图表
-    st.pyplot(plt)
+    st_echarts(options=options)
