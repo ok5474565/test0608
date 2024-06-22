@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+import matplotlib.pyplot as plt
 
 # Function to calculate covariance for sorting
 def calculate_covariance(student_scores, problem_scores):
@@ -47,6 +48,27 @@ def process_sp_chart(file):
     
     return sorted_df, sorted_students, sorted_problems
 
+# Function to plot S-P curve
+def plot_sp_curve(sorted_df, sorted_students, sorted_problems):
+    # Calculate cumulative scores for students and problems
+    student_cumulative_scores = sorted_df.sum(axis=1).cumsum()
+    problem_cumulative_scores = sorted_df.sum(axis=0).cumsum()
+    
+    # Normalize the scores
+    student_cumulative_scores_normalized = student_cumulative_scores / student_cumulative_scores.max()
+    problem_cumulative_scores_normalized = problem_cumulative_scores / problem_cumulative_scores.max()
+    
+    # Plot S-P curve
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, len(student_cumulative_scores_normalized) + 1), student_cumulative_scores_normalized, marker='o', label='Students')
+    plt.plot(range(1, len(problem_cumulative_scores_normalized) + 1), problem_cumulative_scores_normalized, marker='x', label='Problems')
+    plt.xlabel('Number')
+    plt.ylabel('Cumulative Score (Normalized)')
+    plt.title('S-P Curve')
+    plt.legend()
+    plt.grid(True)
+    st.pyplot(plt)
+
 # Streamlit app
 st.title("S-P 表格生成器")
 
@@ -69,3 +91,7 @@ if uploaded_file is not None:
             file_name="sorted_sp_chart.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
+    # Plot S-P curve
+    st.write("生成的S-P曲线：")
+    plot_sp_curve(sorted_df, sorted_students, sorted_problems)
