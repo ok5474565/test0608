@@ -1,45 +1,84 @@
-import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
+import streamlit as st
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# 上传文件
-uploaded_file = st.file_uploader("上传S-P表格", type=["csv", "xlsx"])
+# Function to calculate covariance for sorting
+def calculate_covariance(student_scores, problem_scores):
+    # 因为问题得分向量和学生得分向量是一维的，所以使用np.cov可能会出错
+    # 这里我们直接计算两个向量的协方差
+    return np.dot(student_scores, problem_scores) / len(student_scores)
+
+# Function to load and process the data
+def process_sp_chart(file):
+    df = pd.read_excel(file, header=0, index_col=0)
+    
+    # Extracting student names and problem names
+    student_names = df.index.tolist()
+    problem_names = df.columns.tolist()
+    
+    # Calculating student scores and problem scores
+    student_scores = df.sum(axis=1)
+    problem_scores = df.sum(axis=0)
+    
+    # Sorting students by total score, then by covariance if scores are the same
+    sorted_students = sorted(
+        range(len(student_scores)), 
+        key=lambda i: (-student_scores[i], calculate_covariance(df.iloc[:, i], problem_scores))
+    )
+    
+    # Sorting problems by average score, then by covariance if scores are the same
+    sorted_problems = sorted(
+        range(len(problem_scores)), 
+        key=lambda i: (-problem_scores[i], calculate_covariance(df.iloc[i, :], student_scores))
+    )
+    
+    # Generating the sorted S-P table
+    sorted_df = df.loc[sorted_students, sorted_problems]
+    
+    return sorted_df, student_names[sorted_students], problem_names[sorted_problems]
+
+# Function to plot the S-P chart
+def plot_sp_chart(sorted_df):
+    # 为绘图设置图形大小
+    plt.figure(figsize=(10, sorted_df.shape[0] / sorted_df.shape[1] * 10))
+    
+    # 使用seaborn的heatmap绘制S-P曲线
+    sns.heatmap(sorted_df, annot=True, fmt="d", cmap="YlGnBu", cbar=False)
+    
+    # 设置标题和坐标轴标签
+    plt.title('S-P Chart')
+    plt.xlabel('Problems')
+    plt.ylabel('Students')
+    
+    # 优化Y轴的标签显示，防止重叠
+    plt.yticks(rotation=0)
+    
+    # 显示图形
+    plt.show()
+
+# Streamlit app
+st.title("S-P Chart Generator")
+
+uploaded_file = st.file_uploader("Upload your Excel file (.xlsx)", type=["xlsx"])
 
 if uploaded_file is not None:
-    # 读取文件
-    if uploaded_file.name.endswith('.csv'):
-        df = pd.read_csv(uploaded_file)
-    else:
-        df = pd.read_excel(uploaded_file)
-
-    st.write("原始数据表格：")
-    st.dataframe(df)
-
-    # 确保所有数据都是数值类型
-    df = df.apply(pd.to_numeric, errors='coerce')
-
-    # 绘制S-P曲线
-    st.write("S-P曲线：")
-    fig, ax = plt.subplots()
-    for index, row in df.iterrows():
-        ax.plot(row.values, label=f"Student {index+1}")
-    ax.set_xlabel('Problem Index')
-    ax.set_ylabel('Score')
-    ax.set_title('S-P Curve')
-    ax.legend()
-    st.pyplot(fig)
-
-    # 计算差异系数
-    student_mean_scores = df.mean(axis=1)
-    total_mean_score = student_mean_scores.mean()
-    total_sd = student_mean_scores.std()
-    difference_coefficient = total_sd / total_mean_score
-    st.write(f"差异系数：{difference_coefficient:.2f}")
-
-    # 计算注意系数
-    problem_mean_scores = df.mean(axis=0)
-    total_problem_mean_score = problem_mean_scores.mean()
-    total_problem_sd = problem_mean_scores.std()
-    attention_coefficient = total_problem_sd / total_problem_mean_score
-    st.write(f"注意系数：{attention_coefficient:.2f}")
+    st.write("Upload successful!")
+    sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
+    
+    st.write("Generated S-P Table:")
+    st.dataframe(sorted_df)
+    
+    # Plot and display the S-P chart
+    st.write("Plotting S-P Chart:")
+    plot_sp_chart(sorted_df)
+    
+    # Option to download the sorted S-P table
+    st.write("Download the S-P Table:")
+    st.download_button(
+        label="Download Excel file",
+        data=pd.ExcelWriter("sorted_sp_chart.xlsx", engine='openpyxl'),
+        file_name="sorted_sp_chart.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
