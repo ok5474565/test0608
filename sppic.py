@@ -45,6 +45,32 @@ def process_sp_chart(file):
     sorted_df.index.name = df.index.name
     sorted_df.columns.name = df.columns.name
     
+    def plot_sp_curves(df):
+        # 绘制S曲线
+        plt.figure(figsize=(10, 5))
+        plt.subplot(1, 2, 1)
+        for index, row in df.iterrows():
+            plt.plot(row.index, row.values, drawstyle="steps-post", marker='o')
+        plt.title('S曲线')
+        plt.xlabel('问题')
+        plt.ylabel('学生得分')
+
+        # 绘制P曲线
+        plt.subplot(1, 2, 2)
+        for column in df.columns:
+            plt.plot(df[column], drawstyle="steps-post", marker='o')
+        plt.title('P曲线')
+        plt.xlabel('学生')
+        plt.ylabel('问题得分')
+
+        plt.tight_layout()
+        plt.show()
+
+    # ...（之前的代码不变）
+
+    # 在这里调用绘制曲线的函数
+    plot_sp_curves(sorted_df)
+
     return sorted_df, sorted_students, sorted_problems
 
 # Streamlit app
@@ -58,6 +84,10 @@ if uploaded_file is not None:
     
     st.write("生成的S-P表格：")
     st.dataframe(sorted_df)
+
+    sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
+    plot_sp_curves(sorted_df)
+
     
     # Option to download the sorted S-P table
     st.write("下载S-P表格：")
