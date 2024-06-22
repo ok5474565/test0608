@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
@@ -13,33 +14,37 @@ def main():
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 学生姓名是第一列的值，排除标题"对象"
+        # 学生姓名是第一列的值，除了第一行（标题）
         students = data.iloc[1:, 0]  # 从第二行开始取第一列的所有值
 
-        # 题目号码是第一行的值，排除第一列
-        problems = data.iloc[0, 1:]  # 取第一行的第二列到最后一列的值
+        # 题目号码是第一行的值，除了第一列（学生姓名标题）
+        problems = data.iloc[0, 1:].tolist()  # 取第一行的第二列到最后一列的值
 
         # 构建DataFrame，排除标题"对象"和第一行的非题目列
-        sp_df = data.iloc[1:, 1:]  # 从第二行第二列开始选取所有数据
+        scores = data.iloc[1:, 1:]  # 从第二行第二列开始选取所有数据
 
-        # 确保DataFrame的行索引是学生姓名，列索引是题目号码
-        sp_df.index = students
-        sp_df.columns = problems
+        # 将得分矩阵转换为DataFrame
+        sp_df = pd.DataFrame(scores, index=students, columns=problems)
 
-        # 计算每个学生的总分和每个问题的总分
+        # 计算每个学生的总分
         student_totals = sp_df.sum(axis=1)
+
+        # 计算每个问题的总分
         problem_totals = sp_df.sum(axis=0)
 
         # 根据总分排序学生和问题
         sorted_students_index = student_totals.sort_values(ascending=False).index
         sorted_problems_index = problem_totals.sort_values(ascending=False).index
 
-        # 根据总分排序S-P表
+        # 创建排序后的S-P表格
         sorted_sp_df = sp_df.loc[sorted_students_index, sorted_problems_index]
 
         # 显示S-P表格
         st.write("S-P Table:")
-        st.table(sorted_sp_df)
+        if sorted_sp_df.empty:
+            st.write("No data available.")
+        else:
+            st.table(sorted_sp_df)
 
         # 绘制S-P曲线
         s_curve = sorted_sp_df.mean(axis=1)
