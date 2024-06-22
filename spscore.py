@@ -23,25 +23,25 @@ def main():
 
         # 学生姓名和题目号码
         students = data.columns[1:]  # 第一列除了标题外都是学生姓名
-        problems = data.index[1:]    # 第一行除了标题外都是题目号码
+        problems = data.index[1:]   # 第一行除了标题外都是题目号码
 
         # 构建DataFrame，排除标题"对象"
-        # 使用iloc来基于位置进行切片
         scores = data.iloc[1:, 1:].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
         problem_totals = scores.sum(axis=0)
 
+        # 将学生总分转换为DataFrame，并添加列名“总分”
+        student_totals_df = pd.DataFrame({'总分': student_totals})
+
         # 计算协方差排序的键值
         student_covs = scores.apply(lambda row: cov_sort_key(row, problem_totals.values), axis=1)
-        # 将 Series 转换为 DataFrame 以使用 .assign()
-        student_totals_df = pd.DataFrame(student_totals).transpose()
+        # 将协方差值添加到学生总分DataFrame中
+        student_totals_df['cov'] = student_covs
+
         # 根据总分和协方差排序学生
-        sorted_students_index = (student_totals_df
-                                 .assign(cov=student_covs)
-                                 .sort_values(['总分', 'cov'], ascending=[False, False])
-                                 .index)
+        sorted_students_index = student_totals_df.sort_values(['总分', 'cov'], ascending=[False, False]).index
 
         # 根据问题总分排序问题
         sorted_problems_index = problem_totals.sort_values(ascending=False).index
