@@ -4,6 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
+def cov_sort_key(df, row):
+    # 获取问题得分向量
+    problem_scores = df.sum(axis=1)
+    # 计算协方差并返回，用于排序
+    return np.cov(row, problem_scores)[0, 1]
+
 def main():
     st.title('S-P Chart and Analysis Tool')
 
@@ -14,30 +20,34 @@ def main():
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 学生姓名是第一列的值（除了标题）
-        students = data.iloc[1:, 0].values  # 从第二行开始取第一列的所有值
+        # 移除标题行和列
+        data = data.drop(data.columns[0], axis=1).drop(data.index[0])
 
-        # 题目名称是第一行的值（除了标题）
-        problems = data.iloc[0, 1:].values  # 取第一行的第二列到最后一列的值
+        # 学生姓名和题目号码
+        students = data.columns
+        problems = data.index
 
-        # 构建DataFrame，排除标题行和列
-        scores = data.iloc[1:, 1:].astype(int)  # 从第二行第二列开始选取所有数据，并转换为整数类型
+        # 转换数据类型为整数
+        scores = data.astype(int)
 
-        # 创建DataFrame，行列索引分别为学生和题目
-        sp_df = pd.DataFrame(scores, index=students, columns=problems)
+        # 计算总分
+        student_totals = scores.sum(axis=1)
+        problem_totals = scores.sum(axis=0)
 
-        # 计算每个学生的总分和每个问题的总分
-        student_totals = sp_df.sum(axis=1)
-        problem_totals = sp_df.sum(axis=0)
-
-        # 根据总分排序学生
-        sorted_students = student_totals.sort_values(ascending=False)
-
-        # 根据总分排序问题
-        sorted_problems = problem_totals.sort_values(ascending=False)
+        # 根据总分和协方差排序
+        sorted_students_index = (student_totals.sort_values(ascending=False)
+                                 .merge(pd.Series({idx: cov_sort_key(scores, scores.loc[idx, :]) for idx in scores.index}),
+                                        left_index=True, right_index=True)
+                                 .sort_values(by='cov', ascending=False)
+                                 .index)
+        sorted_problems_index = (problem_totals.sort_values(ascending=False)
+                                 .merge(pd.Series({idx: cov_sort_key(scores.T, scores.T.loc[:, idx]) for idx in scores.columns}),
+                                        left_index=True, right_index=True)
+                                 .sort_values(by='cov', ascending=False)
+                                 .index)
 
         # 创建排序后的S-P表格
-        sorted_sp_df = sp_df.loc[sorted_students.index, sorted_problems.index]
+        sorted_sp_df = scores.loc[sorted_students_index, sorted_problems_index]
 
         # 显示S-P表格
         st.write("S-P Table:")
