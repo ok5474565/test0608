@@ -50,7 +50,7 @@ def process_sp_chart(file):
 def main():
     st.title("S-P 表格生成器")
     
-    uploaded_file = st.file_uploader("上传Excel文件", type=["xlsx", "csv"])
+    uploaded_file = st.file_uploader("上传Excel文件", type=["xlsx"])
     
     if uploaded_file is not None:
         st.write("上传成功！")
