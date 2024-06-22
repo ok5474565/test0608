@@ -14,37 +14,30 @@ def main():
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 学生姓名是第一列的值，除了第一行（标题）
-        students = data.iloc[1:, 0]  # 从第二行开始取第一列的所有值
+        # 学生姓名是第一列的值，除了标题"对象"
+        students = data.iloc[:, 0].drop('对象').tolist()
 
-        # 题目号码是第一行的值，除了第一列（学生姓名标题）
-        problems = data.iloc[0, 1:].tolist()  # 取第一行的第二列到最后一列的值
+        # 题目名称是第一行的值，除了第一列
+        problems = data.index[1:].tolist()  # 假设第一行为题目名称
 
         # 构建DataFrame，排除标题"对象"和第一行的非题目列
-        scores = data.iloc[1:, 1:]  # 从第二行第二列开始选取所有数据
+        sp_df = data.loc[1:, 1:]  # 从第二行第二列开始选取所有数据
 
-        # 将得分矩阵转换为DataFrame
-        sp_df = pd.DataFrame(scores, index=students, columns=problems)
-
-        # 计算每个学生的总分
+        # 计算每个学生的总分和每个问题的总分
         student_totals = sp_df.sum(axis=1)
-
-        # 计算每个问题的总分
         problem_totals = sp_df.sum(axis=0)
 
         # 根据总分排序学生和问题
         sorted_students_index = student_totals.sort_values(ascending=False).index
         sorted_problems_index = problem_totals.sort_values(ascending=False).index
 
-        # 创建排序后的S-P表格
-        sorted_sp_df = sp_df.loc[sorted_students_index, sorted_problems_index]
+        # 如果总分相同，则使用索引作为第二排序标准
+        sorted_sp_df = sp_df.reindex(sorted_students_index, axis='index') if len(set(student_totals)) != len(student_totals) else sorted_sp_df
+        sorted_sp_df = sorted_sp_df.reindex(sorted_problems_index, axis='columns')
 
         # 显示S-P表格
         st.write("S-P Table:")
-        if sorted_sp_df.empty:
-            st.write("No data available.")
-        else:
-            st.table(sorted_sp_df)
+        st.table(sorted_sp_df)
 
         # 绘制S-P曲线
         s_curve = sorted_sp_df.mean(axis=1)
