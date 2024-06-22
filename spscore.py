@@ -2,8 +2,37 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import pearsonr
 
+def calculate_totals(data):
+    student_totals = data.sum(axis=1)  # 学生总分
+    problem_totals = data.sum(axis=0)  # 问题总分
+    return student_totals, problem_totals
+
+def sort_data_by_totals(data, student_totals, problem_totals):
+    # 根据学生总分排序
+    sorted_students_index = student_totals.sort_values(ascending=False).index
+    # 根据问题总分排序
+    sorted_problems_index = problem_totals.sort_values(ascending=False).index
+    # 重新排序DataFrame
+    sorted_data = data.loc[sorted_students_index, sorted_problems_index]
+    return sorted_data
+
+def plot_sp_curve(data):
+    plt.figure(figsize=(12, 8))
+    for column in data.columns:
+        plt.plot(data[column], label=column)
+    plt.title('S-P Curve')
+    plt.xlabel('Students')
+    plt.ylabel('Score')
+    plt.legend()
+    return plt
+
+def calculate_coefficients(data):
+    average = data.mean()
+    std_dev = data.std()
+    cv = std_dev / average  # 差异系数
+    attention_coefficient = 1 - average  # 注意系数
+    return average, std_dev, cv, attention_coefficient
 
 def main():
     st.title('学生得分统计与分析')
@@ -14,45 +43,22 @@ def main():
         # 读取文件
         data = pd.read_excel(uploaded_file)
 
-        # 去除列名中的空格
-        data.columns = data.columns.str.strip()
+        # 计算总分
+        student_totals, problem_totals = calculate_totals(data)
 
-        # 选择数值列进行求和
-        numeric_data = data.select_dtypes(include=[np.number])
-        student_totals = numeric_data.sum(axis=1)  # 学生总分
-
-        # 计算每个问题的正答次数（假设第一行是题目编号）
-        problem_totals = numeric_data.sum(axis=0)  # 问题总分
-
-        # 根据学生总分排序
-        sorted_students = student_totals.sort_values(ascending=False)
-
-        # 根据问题总分排序
-        sorted_problems = problem_totals.sort_values(ascending=False)
+        # 根据总分排序
+        sorted_data = sort_data_by_totals(data, student_totals, problem_totals)
 
         # 绘制S-P曲线
-        plot_sp_curve(numeric_data, sorted_problems.index)
+        sp_curve = plot_sp_curve(sorted_data)
+        st.pyplot(sp_curve)
 
-        # 显示排序后的学生列表
-        st.write("学生得分排序：")
-        st.write(sorted_students)
-
-        # 显示排序后的问题列表
-        st.write("问题得分排序：")
-        st.write(sorted_problems)
-
-def plot_sp_curve(data, problems):
-    plt.figure(figsize=(10, 6))
-    for idx, problem in enumerate(problems, start=1):  # 假设问题编号从1开始
-        # 假设问题编号是以字符串形式存储在第一行的
-        # 我们通过问题编号的索引来选择列
-        scores = data.iloc[:, idx-1]  # 减1是因为索引是从0开始的
-        plt.plot(scores, label=problem)
-    plt.title('S-P Curve')
-    plt.xlabel('学生')
-    plt.ylabel('正答次数')
-    plt.legend()
-    st.pyplot(plt)
+        # 计算差异系数和注意系数
+        average, std_dev, cv, attention_coefficient = calculate_coefficients(sorted_data)
+        st.write("平均值:", average)
+        st.write("标准差:", std_dev)
+        st.write("差异系数:", cv)
+        st.write("注意系数:", attention_coefficient)
 
 if __name__ == '__main__':
     main()
