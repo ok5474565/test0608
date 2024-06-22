@@ -1,14 +1,10 @@
 import pandas as pd
 import numpy as np
-import streamlit as st
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Function to calculate covariance for sorting
 def calculate_covariance(student_scores, problem_scores):
-    # 因为问题得分向量和学生得分向量是一维的，所以使用np.cov可能会出错
-    # 这里我们直接计算两个向量的协方差
-    return np.dot(student_scores, problem_scores) / len(student_scores)
+    return np.cov(student_scores, problem_scores)[0, 1]
 
 # Function to load and process the data
 def process_sp_chart(file):
@@ -23,62 +19,71 @@ def process_sp_chart(file):
     problem_scores = df.sum(axis=0)
     
     # Sorting students by total score, then by covariance if scores are the same
-    sorted_students = sorted(
-        range(len(student_scores)), 
-        key=lambda i: (-student_scores[i], calculate_covariance(df.iloc[:, i], problem_scores))
-    )
+    sorted_students = student_scores.sort_values(ascending=False).index.tolist()
+    for i in range(len(sorted_students) - 1):
+        for j in range(i + 1, len(sorted_students)):
+            if student_scores[sorted_students[i]] == student_scores[sorted_students[j]]:
+                cov_i = calculate_covariance(df.loc[sorted_students[i]], problem_scores)
+                cov_j = calculate_covariance(df.loc[sorted_students[j]], problem_scores)
+                if cov_i < cov_j:
+                    sorted_students[i], sorted_students[j] = sorted_students[j], sorted_students[i]
     
-    # Sorting problems by average score, then by covariance if scores are the same
-    sorted_problems = sorted(
-        range(len(problem_scores)), 
-        key=lambda i: (-problem_scores[i], calculate_covariance(df.iloc[i, :], student_scores))
-    )
-    
+    # Sorting problems by total score, then by covariance if scores are the same
+    sorted_problems = problem_scores.sort_values(ascending=False).index.tolist()
+    for i in range(len(sorted_problems) - 1):
+        for j in range(i + 1, len(sorted_problems)):
+            if problem_scores[sorted_problems[i]] == problem_scores[sorted_problems[j]]:
+                cov_i = calculate_covariance(df[sorted_problems[i]], student_scores)
+                cov_j = calculate_covariance(df[sorted_problems[j]], student_scores)
+                if cov_i < cov_j:
+                    sorted_problems[i], sorted_problems[j] = sorted_problems[j], sorted_problems[i]
+
     # Generating the sorted S-P table
     sorted_df = df.loc[sorted_students, sorted_problems]
     
-    return sorted_df, student_names[sorted_students], problem_names[sorted_problems]
+    # Adding sorted student and problem names back to the table
+    sorted_df.index.name = df.index.name
+    sorted_df.columns.name = df.columns.name
+    
+    return sorted_df, sorted_students, sorted_problems
 
-# Function to plot the S-P chart
-def plot_sp_chart(sorted_df):
-    # 为绘图设置图形大小
-    plt.figure(figsize=(10, sorted_df.shape[0] / sorted_df.shape[1] * 10))
+# Function to plot S-line and P-line from sorted data
+def plot_sp_chart(sorted_df, sorted_students, sorted_problems):
+    num_students, num_questions = sorted_df.shape
     
-    # 使用seaborn的heatmap绘制S-P曲线
-    sns.heatmap(sorted_df, annot=True, fmt="d", cmap="YlGnBu", cbar=False)
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
     
-    # 设置标题和坐标轴标签
-    plt.title('S-P Chart')
-    plt.xlabel('Problems')
-    plt.ylabel('Students')
+    # S-line: For each student, draw vertical segments
+    student_scores = sorted_df.sum(axis=1)
+    for i, student in enumerate(sorted_students):
+        ax[0].vlines(i, ymin=0, ymax=student_scores[student], color='b')
+        if i < num_students - 1:
+            ax[0].hlines(y=student_scores[student], xmin=i, xmax=i + 1, color='b')
     
-    # 优化Y轴的标签显示，防止重叠
-    plt.yticks(rotation=0)
+    ax[0].set_xticks(np.arange(num_students))
+    ax[0].set_xticklabels(sorted_students, rotation=90)
+    ax[0].set_yticks(np.arange(num_questions + 1))
+    ax[0].set_ylabel('Number of Correct Answers')
+    ax[0].set_title('S-line: Student Performance')
     
-    # 显示图形
+    # P-line: For each question, draw horizontal segments
+    problem_scores = sorted_df.sum(axis=0)
+    for j, problem in enumerate(sorted_problems):
+        ax[1].hlines(j, xmin=0, xmax=problem_scores[problem], color='r')
+        if j < num_questions - 1:
+            ax[1].vlines(x=problem_scores[problem], ymin=j, ymax=j + 1, color='r')
+    
+    ax[1].set_yticks(np.arange(num_questions))
+    ax[1].set_yticklabels(sorted_problems)
+    ax[1].set_xticks(np.arange(num_students + 1))
+    ax[1].set_xlabel('Number of Students Answered Correctly')
+    ax[1].set_title('P-line: Question Difficulty')
+    
+    plt.tight_layout()
     plt.show()
 
-# Streamlit app
-st.title("S-P Chart Generator")
+# Usage example
+file_path = "path_to_your_file.xlsx"  # Replace with your file path
 
-uploaded_file = st.file_uploader("Upload your Excel file (.xlsx)", type=["xlsx"])
-
-if uploaded_file is not None:
-    st.write("Upload successful!")
-    sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
-    
-    st.write("Generated S-P Table:")
-    st.dataframe(sorted_df)
-    
-    # Plot and display the S-P chart
-    st.write("Plotting S-P Chart:")
-    plot_sp_chart(sorted_df)
-    
-    # Option to download the sorted S-P table
-    st.write("Download the S-P Table:")
-    st.download_button(
-        label="Download Excel file",
-        data=pd.ExcelWriter("sorted_sp_chart.xlsx", engine='openpyxl'),
-        file_name="sorted_sp_chart.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+sorted_df, sorted_students, sorted_problems = process_sp_chart(file_path)
+plot_sp_chart(sorted_df, sorted_students, sorted_problems)
