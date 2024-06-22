@@ -1,73 +1,41 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-def calculate_totals(data):
-    # 确保所有数据都是数值类型
-    data = data.apply(pd.to_numeric, errors='coerce')
-    
-    # 替换非数值数据为0或1，这里使用0
-    data = data.where(data.isna(), 0)
-    
-    # 计算学生总分
-    student_totals = data.sum(axis=1)  
-    # 计算问题总分
-    problem_totals = data.sum(axis=0)  
-    
-    return student_totals, problem_totals
-
-def sort_data_by_totals(data, student_totals, problem_totals):
-    # 根据学生总分排序
-    sorted_students_index = student_totals.sort_values(ascending=False).index
-    # 根据问题总分排序
-    sorted_problems_index = problem_totals.sort_values(ascending=False).index
-    # 重新排序DataFrame
-    sorted_data = data.loc[sorted_students_index, sorted_problems_index]
-    return sorted_data
-
-def plot_sp_curve(data):
-    plt.figure(figsize=(12, 8))
-    for column in data.columns:
-        plt.plot(data[column], label=column)
-    plt.title('S-P Curve')
-    plt.xlabel('Students')
-    plt.ylabel('Score')
-    plt.legend()
-    return plt
-
-def calculate_coefficients(data):
-    average = data.mean()
-    std_dev = data.std()
-    cv = std_dev / average  # 差异系数
-    attention_coefficient = 1 - average  # 注意系数
-    return average, std_dev, cv, attention_coefficient
-
+# Streamlit界面设置
 def main():
-    st.title('学生得分统计与分析')
+    st.title('学生得分统计与S-P表格生成')
 
-    # 上传文件
-    uploaded_file = st.file_uploader("请上传您的 Excel 文件", type=["xlsx"])
+    # 用户上传文件
+    uploaded_file = st.file_uploader("请上传您的 Excel 文件 (.xlsx)", type=["xlsx"])
     if uploaded_file is not None:
         # 读取文件
         data = pd.read_excel(uploaded_file)
 
-        # 计算总分
-        student_totals, problem_totals = calculate_totals(data)
+        # 移除包含"对象"的单元格，假设"对象"在第一行第一列
+        if '对象' in data.iloc[0, 0]:
+            data = data.iloc[1:]  # 移除第一行
+            data.columns = data.columns.str.strip()  # 清理列名中的空格
 
-        # 根据总分排序
-        sorted_data = sort_data_by_totals(data, student_totals, problem_totals)
+        # 计算每个学生的总分
+        student_totals = data.sum(axis=1)
 
-        # 绘制S-P曲线
-        sp_curve = plot_sp_curve(sorted_data)
-        st.pyplot(sp_curve)
+        # 计算每个问题的总分
+        problem_totals = data.sum(axis=0)
 
-        # 计算差异系数和注意系数
-        average, std_dev, cv, attention_coefficient = calculate_coefficients(sorted_data)
-        st.write("平均值:", average)
-        st.write("标准差:", std_dev)
-        st.write("差异系数:", cv)
-        st.write("注意系数:", attention_coefficient)
+        # 根据学生总分和问题总分排序
+        sorted_students = student_totals.sort_values(ascending=False)
+        sorted_problems = problem_totals.sort_values(ascending=False)
 
+        # 根据总分排序DataFrame
+        sorted_data = data.loc[sorted_students.index, sorted_problems.index]
+
+        # 显示排序后的DataFrame
+        st.write("S-P 表格:")
+        st.write(sorted_data)
+
+        # TODO: 曲线图和系数计算可以根据需要添加
+
+# 运行主函数
 if __name__ == '__main__':
     main()
