@@ -16,11 +16,14 @@ if uploaded_file is not None:
     st.write("原始数据表格：")
     st.dataframe(df)
 
+    # 确保所有数据都是数值类型
+    df = df.apply(pd.to_numeric, errors='coerce')
+
     # 绘制S-P曲线
     st.write("S-P曲线：")
     fig, ax = plt.subplots()
     for index, row in df.iterrows():
-        ax.plot(row, label=f"Student {index+1}")
+        ax.plot(row.values, label=f"Student {index+1}")
     ax.set_xlabel('Problem Index')
     ax.set_ylabel('Score')
     ax.set_title('S-P Curve')
@@ -40,4 +43,3 @@ if uploaded_file is not None:
     total_problem_sd = problem_mean_scores.std()
     attention_coefficient = total_problem_sd / total_problem_mean_score
     st.write(f"注意系数：{attention_coefficient:.2f}")
-
