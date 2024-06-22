@@ -12,7 +12,7 @@ chinese_font = FontProperties(fname=font_path, size=14)
 
 
 def main():
-    st.title("S-P 曲线生成器maplotlib")
+    
     # 假设 simhei.ttf 已经上传到你的 Streamlit 应用的根目录下
     # 你需要根据实际上传的路径来设置 font_path
     font_path = 'simhei.ttf'
