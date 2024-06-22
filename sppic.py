@@ -2,6 +2,12 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from matplotlib.font_manager import FontProperties
+
+# 假设 simhei.ttf 已经上传到你的 Streamlit 应用的根目录下
+# 你需要根据实际上传的路径来设置 font_path
+font_path = 'simhei.ttf'
+chinese_font = FontProperties(fname=font_path, size=14)
 
 
 
@@ -44,10 +50,10 @@ if uploaded_file is not None:
     # 绘制 P 曲线（实线）
     plt.plot(p_curve_normalized_index, p_curve.values, 'b-', label='P 曲线 - 题目难度')
 
-    plt.title('综合 S 和 P 曲线')
-    plt.xlabel('索引')
-    plt.ylabel('百分比')
-    plt.legend()
+    plt.title('综合 S 和 P 曲线', fontproperties=chinese_font)
+    plt.xlabel('索引', fontproperties=chinese_font)
+    plt.ylabel('百分比', fontproperties=chinese_font)
+    plt.legend(prop=chinese_font)
     plt.tight_layout()
 
     # 展示图表
