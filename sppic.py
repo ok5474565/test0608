@@ -6,9 +6,9 @@ import seaborn as sns
 
 # Function to calculate covariance for sorting
 def calculate_covariance(student_scores, problem_scores):
-    # 因为问题得分向量和学生得分向量是一维的，所以使用np.cov可能会出错
-    # 这里我们直接计算两个向量的协方差
-    return np.dot(student_scores, problem_scores) / len(student_scores)
+    # student_scores 和 problem_scores 都是一维数组
+    # 计算协方差，这里使用 numpy 的 cov 函数，它可以直接处理一维数组
+    return np.cov(student_scores, problem_scores)[0, 1]
 
 # Function to load and process the data
 def process_sp_chart(file):
