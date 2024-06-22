@@ -11,15 +11,14 @@ def main():
         # 读取文件
         data = pd.read_excel(uploaded_file)
 
-        # 取第一行作为题目（列名）
-        col_names = data.iloc[0]
-        
+        # 取第一行作为题目（列名），同时跳过第一列（通常是"对象"或其他标题）
+        col_names = data.iloc[1]  # 直接取第二行作为列名
+
         # 转置数据，使第一列成为学生姓名（索引）
-        data = data.transpose()
-        
+        data = data.iloc[:, 1:].transpose()  # 取第二列及之后的列进行转置
+
         # 由于转置后，原来的第一列变成了索引，我们将其设置为列名
-        data.index.name = '学生姓名'
-        data.columns = col_names.drop(col_names.index[0])  # 移除原来的"对象"列名
+        data.columns = col_names
 
         # 计算每个学生的总分
         student_totals = data.sum(axis=1)
@@ -31,10 +30,7 @@ def main():
         sorted_students_index = student_totals.sort_values(ascending=False).index
         sorted_problems_index = problem_totals.sort_values(ascending=False).index
 
-        # 根据总分和协方差排序
-        # 略...
-
-        # 创建排序后的DataFrame
+        # 根据总分排序DataFrame
         sorted_data = data.loc[sorted_students_index, sorted_problems_index]
 
         # 显示排序后的DataFrame
