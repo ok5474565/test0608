@@ -8,34 +8,34 @@ def main():
 
     # 允许用户上传文件
     uploaded_file = st.file_uploader("Please upload your score statistics table (.xlsx)")
-    
+
     if uploaded_file is not None:
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 学生姓名是第一列的值（跳过标题"对象"）
-        # 我们假设第一行是题目号码，第一列是学生姓名
-        students = data.iloc[:, 0]  # 获取第一列所有值
-        students = students[students != '对象']  # 排除标题"对象"
+        # 学生姓名是第一列的值，排除标题"对象"
+        students = data.iloc[1:, 0]  # 从第二行开始取第一列的所有值
 
-        # 题目号码是第一行的值，排除第一列（学生姓名）
-        problems = data.index[:-1]  # 获取除最后一行的所有行名，假设最后一行是学生姓名
+        # 题目号码是第一行的值，排除第一列
+        problems = data.iloc[0, 1:]  # 取第一行的第二列到最后一列的值
 
-        # 构建DataFrame，排除标题"对象"
-        sp_df = data.loc['P1':'P8']  # 假设列名是'P1'到'P8'
+        # 构建DataFrame，排除标题"对象"和第一行的非题目列
+        sp_df = data.iloc[1:, 1:]  # 从第二行第二列开始选取所有数据
 
-        # 计算每个学生的总分
+        # 确保DataFrame的行索引是学生姓名，列索引是题目号码
+        sp_df.index = students
+        sp_df.columns = problems
+
+        # 计算每个学生的总分和每个问题的总分
         student_totals = sp_df.sum(axis=1)
-
-        # 计算每个问题的总分
         problem_totals = sp_df.sum(axis=0)
 
         # 根据总分排序学生和问题
-        sorted_students = student_totals.sort_values(ascending=False)
-        sorted_problems = problem_totals.sort_values(ascending=False)
+        sorted_students_index = student_totals.sort_values(ascending=False).index
+        sorted_problems_index = problem_totals.sort_values(ascending=False).index
 
         # 根据总分排序S-P表
-        sorted_sp_df = sp_df.loc[sorted_students.index, sorted_problems.index]
+        sorted_sp_df = sp_df.loc[sorted_students_index, sorted_problems_index]
 
         # 显示S-P表格
         st.write("S-P Table:")
