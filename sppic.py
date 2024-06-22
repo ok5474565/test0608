@@ -1,17 +1,12 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
+import matplotlib.font_manager as fm
 
-# 指定中文字体路径
-font_path = 'simhei.ttf'  # 确保这个路径指向你的字体文件
-
-# 注册字体
-font_prop = FontProperties(fname=font_path)
-
-# 将字体设置为默认字体
+# 设置中文字体
+font_path = "simhei.ttf"
+font_prop = fm.FontProperties(fname=font_path)
 plt.rcParams['font.family'] = font_prop.get_name()
-plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
 
 # 上传文件
 uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx", "csv"])
@@ -47,15 +42,15 @@ if uploaded_file is not None:
     p_curve_normalized_index = range(len(p_curve))
 
     # 绘制 S 曲线（虚线）
-    plt.plot(s_curve_normalized_index, s_curve.values, 'r--', label='S 曲线 - 学生表现')
+    plt.plot(s_curve_normalized_index, s_curve.values, 'r--', label='S 曲线 - 学生表现', fontproperties=font_prop)
 
     # 绘制 P 曲线（实线）
-    plt.plot(p_curve_normalized_index, p_curve.values, 'b-', label='P 曲线 - 题目难度')
+    plt.plot(p_curve_normalized_index, p_curve.values, 'b-', label='P 曲线 - 题目难度', fontproperties=font_prop)
 
-    plt.title('综合 S 和 P 曲线')
-    plt.xlabel('索引')
-    plt.ylabel('百分比')
-    plt.legend()
+    plt.title('综合 S 和 P 曲线', fontproperties=font_prop)
+    plt.xlabel('索引', fontproperties=font_prop)
+    plt.ylabel('百分比', fontproperties=font_prop)
+    plt.legend(prop=font_prop)
     plt.tight_layout()
 
     # 展示图表
