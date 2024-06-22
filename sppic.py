@@ -1,6 +1,17 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+
+# 指定中文字体路径
+font_path = 'simhei.ttf'  # 确保这个路径指向你的字体文件
+
+# 注册字体
+font_prop = FontProperties(fname=font_path)
+
+# 将字体设置为默认字体
+plt.rcParams['font.family'] = font_prop.get_name()
+plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
 
 # 上传文件
 uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx", "csv"])
