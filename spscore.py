@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import streamlit as st
 
 # Function to calculate covariance for sorting
 def calculate_covariance(student_scores, problem_scores):
@@ -47,43 +47,25 @@ def process_sp_chart(file):
     
     return sorted_df, sorted_students, sorted_problems
 
-# Function to plot S-line and P-line from sorted data
-def plot_sp_chart(sorted_df, sorted_students, sorted_problems):
-    num_students, num_questions = sorted_df.shape
-    
-    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-    
-    # S-line: For each student, draw vertical segments
-    student_scores = sorted_df.sum(axis=1)
-    for i, student in enumerate(sorted_students):
-        ax[0].vlines(i, ymin=0, ymax=student_scores[student], color='b')
-        if i < num_students - 1:
-            ax[0].hlines(y=student_scores[student], xmin=i, xmax=i + 1, color='b')
-    
-    ax[0].set_xticks(np.arange(num_students))
-    ax[0].set_xticklabels(sorted_students, rotation=90)
-    ax[0].set_yticks(np.arange(num_questions + 1))
-    ax[0].set_ylabel('Number of Correct Answers')
-    ax[0].set_title('S-line: Student Performance')
-    
-    # P-line: For each question, draw horizontal segments
-    problem_scores = sorted_df.sum(axis=0)
-    for j, problem in enumerate(sorted_problems):
-        ax[1].hlines(j, xmin=0, xmax=problem_scores[problem], color='r')
-        if j < num_questions - 1:
-            ax[1].vlines(x=problem_scores[problem], ymin=j, ymax=j + 1, color='r')
-    
-    ax[1].set_yticks(np.arange(num_questions))
-    ax[1].set_yticklabels(sorted_problems)
-    ax[1].set_xticks(np.arange(num_students + 1))
-    ax[1].set_xlabel('Number of Students Answered Correctly')
-    ax[1].set_title('P-line: Question Difficulty')
-    
-    plt.tight_layout()
-    plt.show()
+# Streamlit app
+st.title("S-P 表格生成器")
 
-# Usage example
-file_path = "path_to_your_file.xlsx"  # Replace with your file path
+uploaded_file = st.file_uploader("上传Excel文件", type=["xlsx"])
 
-sorted_df, sorted_students, sorted_problems = process_sp_chart(file_path)
-plot_sp_chart(sorted_df, sorted_students, sorted_problems)
+if uploaded_file is not None:
+    st.write("上传成功！")
+    sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
+    
+    st.write("生成的S-P表格：")
+    st.dataframe(sorted_df)
+    
+    # Option to download the sorted S-P table
+    st.write("下载S-P表格：")
+    sorted_df.to_excel("sorted_sp_chart.xlsx")
+    with open("sorted_sp_chart.xlsx", "rb") as file:
+        btn = st.download_button(
+            label="下载Excel文件",
+            data=file,
+            file_name="sorted_sp_chart.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
