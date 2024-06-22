@@ -4,8 +4,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def calculate_totals(data):
-    student_totals = data.sum(axis=1)  # 学生总分
-    problem_totals = data.sum(axis=0)  # 问题总分
+    # 确保所有数据都是数值类型
+    data = data.apply(pd.to_numeric, errors='coerce')
+    
+    # 替换非数值数据为0或1，这里使用0
+    data = data.where(data.isna(), 0)
+    
+    # 计算学生总分
+    student_totals = data.sum(axis=1)  
+    # 计算问题总分
+    problem_totals = data.sum(axis=0)  
+    
     return student_totals, problem_totals
 
 def sort_data_by_totals(data, student_totals, problem_totals):
