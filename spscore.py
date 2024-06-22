@@ -19,24 +19,25 @@ def main():
     uploaded_file = st.file_uploader("Please upload your score statistics table (.xlsx)")
     if uploaded_file is not None:
         # 读取Excel文件
-        data = pd.read_excel(uploaded_file, index_col=0)
+        data = pd.read_excel(uploaded_file)
 
         # 学生姓名和题目号码
-        students = data.columns  # 假设第一列是学生姓名
-        problems = data.index[:-1]  # 假设除了最后一行外都是题目号码
+        students = data.columns[1:]  # 假设第一列除了标题外都是学生姓名
+        problems = data.index[1:]   # 假设第一行除了标题外都是题目号码
 
         # 构建DataFrame，排除标题"对象"
-        # 从第二行开始选择数据，避免标题"对象"
-        scores = data.iloc[1:-1].astype(int)
+        scores = data.loc[1:, 1:].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
         problem_totals = scores.sum(axis=0)
 
         # 计算协方差排序的键值
-        student_covs = scores.apply(lambda row: cov_sort_key(row, problem_totals), axis=1)
+        student_covs = scores.apply(lambda row: cov_sort_key(row, problem_totals.values), axis=1)
+        # 将 Series 转换为 DataFrame 以使用 .assign()
+        student_totals_df = pd.DataFrame(student_totals).transpose()
         # 根据总分和协方差排序学生
-        sorted_students_index = (student_totals
+        sorted_students_index = (student_totals_df
                                  .assign(cov=student_covs)
                                  .sort_values(['总分', 'cov'], ascending=[False, False])
                                  .index)
@@ -50,6 +51,7 @@ def main():
         # 显示S-P表格
         st.write("S-P Table:")
         st.table(sorted_sp_df)
+
 
         # 绘制S-P曲线
         s_curve = sorted_sp_df.mean(axis=1)
