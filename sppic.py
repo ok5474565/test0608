@@ -48,25 +48,24 @@ def process_sp_chart(file):
     return sorted_df, sorted_students, sorted_problems
 
 # Streamlit app
-st.title(\"S-P 表格生成器\")
+st.title("S-P 表格生成器")
 
-uploaded_file = st.file_uploader(\"上传Excel文件\", type=[\"xlsx\"])
+uploaded_file = st.file_uploader("上传Excel文件", type=["xlsx"])
 
 if uploaded_file is not None:
-    st.write(\"上传成功！\")
+    st.write("上传成功！")
     sorted_df, sorted_students, sorted_problems = process_sp_chart(uploaded_file)
     
-    st.write(\"生成的S-P表格：\")
+    st.write("生成的S-P表格：")
     st.dataframe(sorted_df)
     
     # Option to download the sorted S-P table
-    st.write(\"下载S-P表格：\")
-    sorted_df.to_excel(\"sorted_sp_chart.xlsx\")
-    with open(\"sorted_sp_chart.xlsx\", \"rb\") as file:
+    st.write("下载S-P表格：")
+    sorted_df.to_excel("sorted_sp_chart.xlsx")
+    with open("sorted_sp_chart.xlsx", "rb") as file:
         btn = st.download_button(
-            label=\"下载Excel文件\",
+            label="下载Excel文件",
             data=file,
-            file_name=\"sorted_sp_chart.xlsx\",
-            mime=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"
+            file_name="sorted_sp_chart.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
