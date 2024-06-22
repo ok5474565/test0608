@@ -8,6 +8,10 @@ def cov_sort_key(df, row_series, problem_scores):
     # 计算协方差
     return np.cov(row_series, problem_scores)[0, 1]
 
+def cov_sort_key(df, row_series, problem_scores):
+    # 计算协方差
+    return np.cov(row_series, problem_scores)[0, 1]
+
 def main():
     st.title('S-P Chart and Analysis Tool')
 
@@ -17,12 +21,16 @@ def main():
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
+        # 确保列名和索引名不是数字
+        data.columns = data.columns.astype(str)
+        data.index = data.index.astype(str)
+
         # 学生姓名和题目号码
         students = data.columns[1:]
         problems = data.index[1:]
 
         # 构建DataFrame，排除标题"对象"
-        scores = data.loc[1:, 1:].astype(int)
+        scores = data.loc[data.index[1:], data.columns[1:]].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
