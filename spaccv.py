@@ -26,7 +26,7 @@ def calculate_coefficients(df):
     return summary
 
 def main():
-    st.title('读取S-P 表格分析计算注意系数和差异系数')
+    st.title('读取S-P表格计算注意系数和差异系数')
 
     # 上传文件
     uploaded_file = st.file_uploader("上传一个xlsx或csv文件", type=["xlsx", "csv"])
