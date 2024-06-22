@@ -4,46 +4,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
-def cov_sort_key(df, row):
-    # 获取问题得分向量
-    problem_scores = df.sum(axis=1)
-    # 计算协方差并返回，用于排序
-    return np.cov(row, problem_scores)[0, 1]
+def cov_sort_key(df, row_series, problem_scores):
+    # 计算协方差
+    return np.cov(row_series, problem_scores)[0, 1]
 
 def main():
     st.title('S-P Chart and Analysis Tool')
 
     # 允许用户上传文件
     uploaded_file = st.file_uploader("Please upload your score statistics table (.xlsx)")
-
     if uploaded_file is not None:
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 移除标题行和列
-        data = data.drop(data.columns[0], axis=1).drop(data.index[0])
-
         # 学生姓名和题目号码
-        students = data.columns
-        problems = data.index
+        students = data.columns[1:]
+        problems = data.index[1:]
 
-        # 转换数据类型为整数
-        scores = data.astype(int)
+        # 构建DataFrame，排除标题"对象"
+        scores = data.loc[1:, 1:].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
         problem_totals = scores.sum(axis=0)
 
-        # 根据总分和协方差排序
-        sorted_students_index = (student_totals.sort_values(ascending=False)
-                                 .merge(pd.Series({idx: cov_sort_key(scores, scores.loc[idx, :]) for idx in scores.index}),
-                                        left_index=True, right_index=True)
-                                 .sort_values(by='cov', ascending=False)
+        # 计算协方差并排序学生
+        problem_scores = scores.sum(axis=1)
+        student_covs = scores.apply(lambda row: cov_sort_key(scores, row, problem_scores), axis=1)
+        sorted_students_index = (student_totals
+                                 .assign(cov=student_covs)
+                                 .sort_values(['总分', 'cov'], ascending=[False, False])
                                  .index)
-        sorted_problems_index = (problem_totals.sort_values(ascending=False)
-                                 .merge(pd.Series({idx: cov_sort_key(scores.T, scores.T.loc[:, idx]) for idx in scores.columns}),
-                                        left_index=True, right_index=True)
-                                 .sort_values(by='cov', ascending=False)
+
+        # 计算协方差并排序问题
+        student_scores = scores.mean(axis=1)
+        problem_covs = problem_totals.apply(lambda prob_total: cov_sort_key(scores.T, prob_total, student_scores), axis=1)
+        sorted_problems_index = (problem_totals
+                                 .assign(cov=problem_covs)
+                                 .sort_values(['总分', 'cov'], ascending=[False, False])
                                  .index)
 
         # 创建排序后的S-P表格
