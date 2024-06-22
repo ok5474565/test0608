@@ -4,87 +4,73 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def load_data(file):
-    data = pd.read_csv(file)
-    return data
+    df = pd.read_excel(file, index_col=0)
+    return df
 
-def create_sp_table(data):
-    # Transpose data to have students as columns and questions as rows
-    sp_table = data.T
-    return sp_table
+def process_data(df):
+    # 计算学生总分
+    df['总分'] = df.sum(axis=1)
+    # 按照总分排序学生
+    df = df.sort_values(by='总分', ascending=False)
+    
+    # 计算每个题目的总分
+    total_scores = df.drop(columns=['总分']).sum(axis=0)
+    # 按照总分排序题目
+    df = df[total_scores.sort_values(ascending=False).index]
+    df = df.join(df.pop('总分'))
+    
+    return df
 
-def sort_sp_table(sp_table):
-    # Sort students by total score (column sums)
-    sp_table = sp_table.reindex(sp_table.sum().sort_values(ascending=False).index, axis=1)
-    # Sort questions by total score (row sums)
-    sp_table = sp_table.reindex(sp_table.sum(axis=1).sort_values(ascending=False).index)
-    return sp_table
-
-def handle_ties(sp_table):
-    # Handle ties for student scores
-    student_scores = sp_table.sum()
-    unique_scores = student_scores.unique()
-    for score in unique_scores:
-        students_with_score = student_scores[student_scores == score].index
-        if len(students_with_score) > 1:
-            cov_matrix = np.cov(sp_table[students_with_score])
-            cov_sums = cov_matrix.sum(axis=0)
-            sorted_students = [students_with_score[i] for i in np.argsort(-cov_sums)]
-            sp_table = sp_table[sorted_students]
-
-    # Handle ties for question scores
-    question_scores = sp_table.sum(axis=1)
-    unique_scores = question_scores.unique()
-    for score in unique_scores:
-        questions_with_score = question_scores[question_scores == score].index
-        if len(questions_with_score) > 1:
-            cov_matrix = np.cov(sp_table.T[questions_with_score])
-            cov_sums = cov_matrix.sum(axis=0)
-            sorted_questions = [questions_with_score[i] for i in np.argsort(-cov_sums)]
-            sp_table = sp_table.loc[sorted_questions]
-
-    return sp_table
-
-def plot_curves(sp_table):
-    num_students = sp_table.shape[1]
-    num_questions = sp_table.shape[0]
-
-    s_curve = np.cumsum(sp_table, axis=0)
-    p_curve = np.cumsum(sp_table, axis=1)
-
+def plot_sp_curves(df):
+    students = df.index
+    problems = df.columns[:-1]
+    student_scores = df['总分']
+    
     fig, ax = plt.subplots(2, 1, figsize=(12, 8))
-
-    for i in range(num_students):
-        ax[0].step(range(num_questions), s_curve[:, i], where='mid', label=f'Student {i+1}')
-    ax[0].set_title('S Curve')
-    ax[0].set_xlabel('Questions')
-    ax[0].set_ylabel('Cumulative Score')
-
-    for i in range(num_questions):
-        ax[1].step(range(num_students), p_curve[i, :], where='mid', label=f'Question {i+1}')
-    ax[1].set_title('P Curve')
-    ax[1].set_xlabel('Students')
-    ax[1].set_ylabel('Cumulative Correct Answers')
-
-    plt.tight_layout()
+    
+    # 绘制S曲线
+    for i, student in enumerate(students):
+        score = student_scores[student]
+        ax[0].vlines(i, 0, score, color='b')
+        for j in range(score):
+            ax[0].hlines(j, i, i+1, color='b')
+    
+    ax[0].set_title('S曲线')
+    ax[0].set_xlabel('学生')
+    ax[0].set_ylabel('得分')
+    ax[0].set_xticks(range(len(students)))
+    ax[0].set_xticklabels(students, rotation=90)
+    
+    # 绘制P曲线
+    for i, problem in enumerate(problems):
+        correct_answers = df[problem].sum()
+        ax[1].hlines(i, 0, correct_answers, color='r')
+        for j in range(correct_answers):
+            ax[1].vlines(j, i, i+1, color='r')
+    
+    ax[1].set_title('P曲线')
+    ax[1].set_xlabel('题目')
+    ax[1].set_ylabel('正答次数')
+    ax[1].set_yticks(range(len(problems)))
+    ax[1].set_yticklabels(problems)
+    
     st.pyplot(fig)
 
 def main():
-    st.title("S-P Table and Curves Generator")
+    st.title("S-P 表格及曲线生成器")
     
-    uploaded_file = st.file_uploader("Upload your score data", type=["csv"])
+    uploaded_file = st.file_uploader("上传一个xlsx文件", type="xlsx")
+    
     if uploaded_file is not None:
-        data = load_data(uploaded_file)
-        st.write("Uploaded Data:")
-        st.dataframe(data)
-
-        sp_table = create_sp_table(data)
-        sp_table = sort_sp_table(sp_table)
-        sp_table = handle_ties(sp_table)
+        df = load_data(uploaded_file)
+        st.write("原始数据：")
+        st.dataframe(df)
         
-        st.write("S-P Table:")
-        st.dataframe(sp_table)
+        processed_df = process_data(df)
+        st.write("处理后的数据：")
+        st.dataframe(processed_df)
         
-        plot_curves(sp_table)
+        plot_sp_curves(processed_df)
 
 if __name__ == "__main__":
     main()
