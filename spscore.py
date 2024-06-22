@@ -1,69 +1,73 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
+import streamlit as st
 
-def read_and_prepare_data(file_path):
-    # 读取Excel文件
-    data = pd.read_excel(file_path)
-    
-    # 忽略第一行的题目编号和第一列的学生姓名
-    body_data = data.iloc[1:, 1:]
-    student_names = data.iloc[0, 1:]  # 第一行的第2列到末尾作为学生姓名
-    problem_ids = data.iloc[1:, 0]  # 第2列到末尾的第1列作为题目编号
-    
-    return body_data, student_names, problem_ids
+# 定义协方差排序函数
+def sort_by_covariance(df, primary_vec, is_student=True):
+    cov_list = []
+    for idx in range(df.shape[0] if is_student else df.shape[1]):
+        vec = df.iloc[idx, :] if is_student else df.iloc[:, idx]
+        cov = np.cov(vec, primary_vec)[0, 1]
+        cov_list.append((idx, cov))
+    cov_list.sort(key=lambda x: x[1], reverse=True)
+    sorted_indices = [x[0] for x in cov_list]
+    return sorted_indices
 
-def calculate_totals(body_data):
-    # 计算学生总分和问题平均分
-    student_totals = body_data.sum(axis=1)
-    problem_averages = body_data.mean(axis=1)
-    
-    return student_totals, problem_averages
+# Streamlit 接口
+st.title('S-P 表格生成工具')
+uploaded_file = st.file_uploader("上传Excel文件", type="xlsx")
 
-def sort_data(student_totals, problem_averages):
+if uploaded_file is not None:
+    df = pd.read_excel(uploaded_file, index_col=0)
+    
+    # 提取题目名称和学生姓名
+    students = df.index.tolist()
+    problems = df.columns.tolist()
+    
+    # 计算总分
+    student_scores = df.sum(axis=1)
+    problem_scores = df.sum(axis=0)
+    
     # 根据学生总分排序
-    sorted_index = student_totals.argsort()[::-1]  # 降序排序索引
-    sorted_student_totals = student_totals[sorted_index]
-    sorted_body_data = body_data.loc[sorted_index, :]
+    sorted_student_indices = student_scores.sort_values(ascending=False).index.tolist()
     
-    # 根据问题平均分排序
-    sorted_problem_index = problem_averages.argsort()  # 升序排序索引
-    sorted_problem_averages = problem_averages[sorted_problem_index]
-    sorted_body_data = sorted_body_data.iloc[:, sorted_problem_index]
+    # 对总分相同的学生，根据协方差排序
+    for score in student_scores.unique():
+        same_score_students = student_scores[student_scores == score].index.tolist()
+        if len(same_score_students) > 1:
+            primary_vec = problem_scores
+            sorted_indices = sort_by_covariance(df.loc[same_score_students, :], primary_vec, is_student=True)
+            sorted_student_indices = [i for i in sorted_student_indices if i not in same_score_students] + [same_score_students[i] for i in sorted_indices]
     
-    return sorted_body_data, sorted_student_totals, sorted_problem_averages
-
-def add_titles(sorted_body_data, student_names, problem_ids):
-    # 添加标题行和列
-    sorted_data_with_titles = pd.concat([
-        pd.DataFrame([problem_ids], columns=sorted_body_data.columns),
-        sorted_body_data
-    ], axis=0)
-    sorted_data_with_titles.index = ['题目编号'] + student_names
-    return sorted_data_with_titles
-
-def main():
-    st.title('S-P Table Generator')
-    uploaded_file = st.file_uploader("Upload your Excel file (.xlsx)", type=["xlsx"])
+    # 根据问题总分排序
+    sorted_problem_indices = problem_scores.sort_values(ascending=False).index.tolist()
     
-    if uploaded_file is not None:
-        file_path = st.text("File path: " + uploaded_file.name)
-        
-        # 读取和准备数据
-        body_data, student_names, problem_ids = read_and_prepare_data(file_path)
-        
-        # 计算总分和平均分
-        student_totals, problem_averages = calculate_totals(body_data)
-        
-        # 排序数据
-        sorted_body_data, sorted_student_totals, sorted_problem_averages = sort_data(student_totals, problem_averages)
-        
-        # 添加标题
-        sp_table = add_titles(sorted_body_data, student_names, problem_ids)
-        
-        # 显示S-P表
-        st.write("Generated S-P Table:")
-        st.dataframe(sp_table)
+    # 对正答率相同的问题，根据协方差排序
+    for score in problem_scores.unique():
+        same_score_problems = problem_scores[problem_scores == score].index.tolist()
+        if len(same_score_problems) > 1:
+            primary_vec = student_scores
+            sorted_indices = sort_by_covariance(df.loc[:, same_score_problems], primary_vec, is_student=False)
+            sorted_problem_indices = [i for i in sorted_problem_indices if i not in same_score_problems] + [same_score_problems[i] for i in sorted_indices]
+    
+    # 生成S-P表格
+    sorted_df = df.loc[sorted_student_indices, sorted_problem_indices]
+    
+    # 添加学生姓名和题目名称
+    sorted_df.index = [students[idx] for idx in sorted_student_indices]
+    sorted_df.columns = [problems[idx] for idx in sorted_problem_indices]
+    
+    st.write("生成的S-P表格：")
+    st.dataframe(sorted_df)
+    
+    # 提供下载链接
+    def to_excel(df):
+        output = io.BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, sheet_name='S-P 表格')
+        writer.save()
+        processed_data = output.getvalue()
+        return processed_data
+    
+    download_link = st.download_button(label="下载S-P表格", data=to_excel(sorted_df), file_name="S-P表格.xlsx")
 
-if __name__ == "__main__":
-    main()
