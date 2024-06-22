@@ -50,7 +50,7 @@ def process_sp_chart(file):
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
         for index, row in df.iterrows():
-            plt.step(df.columns, row, where='post')
+            plt.step(row.index, row.values, where='post')  # 注意这里的row.index和row.values
         plt.title('S曲线 - 学生得分')
         plt.xlabel('学生')
         plt.ylabel('得分')
@@ -58,19 +58,12 @@ def process_sp_chart(file):
         # 绘制P曲线
         plt.subplot(1, 2, 2)
         for column in df.columns:
-            plt.step(df.index, df[column], where='post')
+            plt.step(df.index, df[column], where='post')  # 注意这里的df.index和df[column]
         plt.title('P曲线 - 问题得分')
         plt.xlabel('问题')
         plt.ylabel('得分')
     
         plt.tight_layout()
-
-    # ...（之前的代码不变）
-
-    # 在这里调用绘制曲线的函数
-    plot_sp_curves(sorted_df)
-
-    return sorted_df, sorted_students, sorted_problems
 
 # Streamlit app
 st.title("S-P 表格生成器")
@@ -84,7 +77,8 @@ if uploaded_file is not None:
     st.write("生成的S-P表格：")
     st.dataframe(sorted_df)
 
-    # 绘制并显示S-P曲线
+    # 使用st.pyplot()来显示图表
+    st.write("绘制S-P曲线：")
     with st.spinner('绘制中...'):
         plot_sp_curves(sorted_df)
         st.pyplot()
