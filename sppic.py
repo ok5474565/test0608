@@ -48,23 +48,40 @@ def process_sp_chart(file):
     
     return sorted_df, sorted_students, sorted_problems
 
-# Function to plot S-P chart
-def plot_sp_chart(df, sorted_students, sorted_problems):
-    # Calculate S-P values
-    student_averages = df.mean(axis=1)
-    problem_averages = df.mean(axis=0)
-
-    # Create the plot
-    fig, ax = plt.subplots()
-    ax.plot(range(1, len(sorted_students) + 1), student_averages, marker=\'o\', label=\'Students\')
-    ax.plot(range(1, len(sorted_problems) + 1), problem_averages, marker=\'x\', label=\'Problems\')
-
-    ax.set_xlabel(\'Index\')
-    ax.set_ylabel(\'Average Score\')
-    ax.set_title(\'S-P Chart\')
-    ax.legend()
-
-    return fig
+# Function to plot S-P lines
+def plot_sp_lines(df):
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # 绘制S线
+    for i, student in enumerate(df.columns):
+        scores = df[student].values
+        for j, score in enumerate(scores):
+            ax.plot([i, i], [0, score], color=\'blue\')
+        if i < len(df.columns) - 1:
+            next_scores = df[df.columns[i + 1]].values
+            for j in range(len(scores)):
+                ax.plot([i, i + 1], [scores[j], next_scores[j]], color=\'blue\')
+    
+    # 绘制P线
+    for j, question in enumerate(df.index):
+        correct_counts = df.loc[question].sum()
+        ax.plot([0, correct_counts], [j, j], color=\'red\')
+        if j < len(df.index) - 1:
+            next_correct_counts = df.loc[df.index[j + 1]].sum()
+            ax.plot([correct_counts, next_correct_counts], [j, j + 1], color=\'red\')
+    
+    # 设置标签
+    ax.set_xticks(range(len(df.columns)))
+    ax.set_xticklabels(df.columns)
+    ax.set_yticks(range(len(df.index)))
+    ax.set_yticklabels(df.index)
+    
+    ax.set_xlabel(\'Students\')
+    ax.set_ylabel(\'Questions\')
+    ax.set_title(\'S-P Curve\')
+    plt.grid(True)
+    plt.show()
+    st.pyplot(fig)
 
 # Streamlit app
 st.title(\"S-P 表格生成器\")
@@ -88,8 +105,7 @@ if uploaded_file is not None:
             file_name=\"sorted_sp_chart.xlsx\",
             mime=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"
         )
-
-    # Plotting the S-P chart
-    st.write(\"生成的S-P曲线：\")
-    fig = plot_sp_chart(sorted_df, sorted_students, sorted_problems)
-    st.pyplot(fig)
+    
+    # Plotting S-P lines
+    st.write(\"绘制S-P曲线：\")
+    plot_sp_lines(sorted_df)
