@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# import matplotlib.pyplot as mpl
+import matplotlib.pyplot as mpl
 
 # # 设置matplotlib默认字体为SimHei，以支持中文显示
 # plt.rcParams['font.sans-serif'] = ['SIMHEI']  # 指定默认字体
@@ -15,7 +15,7 @@ font_path = 'SIMHEI.TTF'
 prop = FontProperties(fname=font_path)
 matplotlib.font_manager.fontManager.addfont(font_path)
 
-# mpl.font_manager.fontManager.addfont('SimHei.ttf') #临时注册新的全局字体
+mpl.font_manager.fontManager.addfont('SimHei.ttf') #临时注册新的全局字体
 plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 plt.rcParams['axes.unicode_minus']=False#用来正常显示负号
 
