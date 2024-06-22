@@ -22,11 +22,12 @@ def main():
         data = pd.read_excel(uploaded_file)
 
         # 学生姓名和题目号码
-        students = data.columns[1:]  # 假设第一列除了标题外都是学生姓名
-        problems = data.index[1:]   # 假设第一行除了标题外都是题目号码
+        students = data.columns[1:]  # 第一列除了标题外都是学生姓名
+        problems = data.index[1:]    # 第一行除了标题外都是题目号码
 
         # 构建DataFrame，排除标题"对象"
-        scores = data.loc[1:, 1:].astype(int)
+        # 使用iloc来基于位置进行切片
+        scores = data.iloc[1:, 1:].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
