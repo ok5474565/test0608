@@ -4,13 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 
-def cov_sort_key(df, row_series, problem_scores):
+def cov_sort_key(row_series, problem_scores_mean):
+    # 确保 row_series 是一维数组且与 problem_scores_mean 长度相同
+    if len(row_series) != len(problem_scores_mean):
+        raise ValueError("The length of row_series and problem_scores_mean must be the same.")
+    
     # 计算协方差
-    return np.cov(row_series, problem_scores)[0, 1]
-
-def cov_sort_key(df, row_series, problem_scores):
-    # 计算协方差
-    return np.cov(row_series, problem_scores)[0, 1]
+    return np.cov(row_series, problem_scores_mean)[0, 1]
 
 def main():
     st.title('S-P Chart and Analysis Tool')
@@ -21,36 +21,27 @@ def main():
         # 读取Excel文件
         data = pd.read_excel(uploaded_file)
 
-        # 确保列名和索引名不是数字
-        data.columns = data.columns.astype(str)
-        data.index = data.index.astype(str)
-
         # 学生姓名和题目号码
-        students = data.columns[1:]
-        problems = data.index[1:]
+        students = data.columns[1:]  # 假设第一列除了标题外都是学生姓名
+        problems = data.index[1:]   # 假设第一行除了标题外都是题目号码
 
         # 构建DataFrame，排除标题"对象"
-        scores = data.loc[data.index[1:], data.columns[1:]].astype(int)
+        scores = data.loc[1:, 1:].astype(int)
 
         # 计算总分
         student_totals = scores.sum(axis=1)
         problem_totals = scores.sum(axis=0)
 
-        # 计算协方差并排序学生
-        problem_scores = scores.sum(axis=1)
-        student_covs = scores.apply(lambda row: cov_sort_key(scores, row, problem_scores), axis=1)
+        # 计算协方差排序的键值
+        student_covs = scores.apply(lambda row: cov_sort_key(row, problem_totals), axis=1)
+        # 根据总分和协方差排序学生
         sorted_students_index = (student_totals
                                  .assign(cov=student_covs)
                                  .sort_values(['总分', 'cov'], ascending=[False, False])
                                  .index)
 
-        # 计算协方差并排序问题
-        student_scores = scores.mean(axis=1)
-        problem_covs = problem_totals.apply(lambda prob_total: cov_sort_key(scores.T, prob_total, student_scores), axis=1)
-        sorted_problems_index = (problem_totals
-                                 .assign(cov=problem_covs)
-                                 .sort_values(['总分', 'cov'], ascending=[False, False])
-                                 .index)
+        # 根据问题总分排序问题
+        sorted_problems_index = problem_totals.sort_values(ascending=False).index
 
         # 创建排序后的S-P表格
         sorted_sp_df = scores.loc[sorted_students_index, sorted_problems_index]
