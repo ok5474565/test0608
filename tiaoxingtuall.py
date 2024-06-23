@@ -39,7 +39,7 @@ def read_xlsx_file(uploaded_file):
     return [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设XLSX文件只有一列评论
 
 def main():
-    st.title("在线文本分词与高频词统计小程序")
+    st.title("多编码在线文本分词与高频词统计")
 
     # 设置上传文件的按钮
     uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xlsx"])
