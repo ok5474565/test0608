@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 def main():
-    st.title("S-P 表格分析应用")
+    st.title("计算注意系数及差异系数")
 
     uploaded_file = st.file_uploader("请上传 xlsx 文件", type="xlsx")
 
