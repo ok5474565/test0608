@@ -19,7 +19,7 @@ def main():
     chinese_font = FontProperties(fname=font_path, size=14)
 
     # 上传文件
-    uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx"])
+    uploaded_file = st.file_uploader("上传 S-P 表格文件 ( xlsx )", type=["xlsx"])
 
     if uploaded_file is not None:
         # 读取文件
