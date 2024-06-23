@@ -12,7 +12,7 @@ from ciyuntuall import main as ciyuntuall_main
 from spscore import main as spscore_main             
 from sppic import main as sppic_main                  
 from sppicecharts import main as sppicecharts_main        
-from spaccv import main as spaccv_main                   
+from spcalculate import main as spcalculate_main                   
 
 # from tiaoxingtuend import main as text_analysis_main  # 假设主函数名为main
 # from ciyuntuend import main as wordcloud_main  # 假设主函数名为main
@@ -79,7 +79,7 @@ elif selected_option == "根据S-P表格使用maplotlib绘制S-P曲线":
 elif selected_option == "根据S-P表格使用echarts绘制S-P曲线":
     sppicecharts_main()
 elif selected_option == "根据表格计算注意系数、差异系数":
-    spaccv_main()
+    spcalculate_main()
 # elif selected_option == "在线文本分词与高频词统计小程序":
 #     text_analysis_main()
 # elif selected_option == "在线文本分词与词云图生成小程序":
