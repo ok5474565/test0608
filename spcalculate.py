@@ -21,15 +21,21 @@ def main():
         mean_values = df.mean(axis=1)
         std_values = df.std(axis=1)
         
-        # 计算难度系数（P 指数），反向表示
-        # 高的 P 值意味着题目较难，低的 P 值意味着题目较容易
-        difficulty_index = 1 - df.mean(axis=1)
+        # 计算难度系数（P 指数）
+        total_scores = df.sum(axis=0)
+        max_score = total_scores.max()
+        weighted_scores = df.multiply(total_scores / max_score, axis=1)
+        difficulty_index = weighted_scores.sum(axis=1) / df.shape[1]
         
         # 计算注意系数（D 指数）
-        sorted_df = df.apply(lambda x: sorted(x, reverse=True))
-        upper_group = sorted_df.iloc[:, :len(df.columns)//2]
-        lower_group = sorted_df.iloc[:, len(df.columns)//2:]
-        discrimination_index = upper_group.mean(axis=1) - lower_group.mean(axis=1)
+        total_scores_sorted = total_scores.sort_values(ascending=False)
+        upper_group = df[total_scores_sorted.index[:len(total_scores_sorted)//2]]
+        lower_group = df[total_scores_sorted.index[len(total_scores_sorted)//2:]]
+        
+        high_group_proportion = upper_group.mean(axis=1)
+        low_group_proportion = lower_group.mean(axis=1)
+        
+        discrimination_index = high_group_proportion / (1 - low_group_proportion)
         
         # 计算相关系数（使用 Pearson 相关系数）
         correlation_matrix = df.T.corr()
