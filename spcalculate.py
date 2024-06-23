@@ -32,7 +32,7 @@ def main():
         
         # 计算相关系数（使用 Pearson 相关系数）
         total_score = df.sum(axis=0)
-        correlation_with_total = df.T.apply(lambda x: x.corr(total_score))
+        correlation_with_total = df.apply(lambda x: x.corr(total_score), axis=1)
         
         # 计算同质性指数（标准化后的方差）
         homogeneity_index = df.var(axis=1) / df.mean(axis=1)
