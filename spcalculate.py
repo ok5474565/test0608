@@ -9,15 +9,16 @@ def main():
 
     if uploaded_file is not None:
         df = pd.read_excel(uploaded_file, header=None)
+        headers = df.iloc[0, 1:].values  # 获取题目名称
         df = df.iloc[1:, 1:]  # 跳过第一行和第一列
-        
+
         st.write("原始数据")
         st.dataframe(df)
 
         # 计算各个题目的平均值和标准差
         means = df.mean(axis=0)
         stds = df.std(axis=0)
-        
+
         # 计算差异系数（P指数）
         p_indexes = 1 - means
 
@@ -29,12 +30,9 @@ def main():
         # 计算同质性指数（基于所有学生回答的标准差）
         homogeneity_indexes = df.std(axis=1).mean()
 
-        # 生成题目号
-        question_numbers = [f'题目{idx+1}' for idx in range(df.shape[1])]
-
-        # 汇总结果
+        # 汇总结果并添加题目名称
         results = pd.DataFrame({
-            '题目号': question_numbers,
+            '题目名称': headers,
             '平均值': means,
             '标准差': stds,
             'D指数': d_indexes,
