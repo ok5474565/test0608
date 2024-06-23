@@ -60,12 +60,12 @@ def main():
 
         csv = convert_df(summary)
         
-        st.download_button(
-            label="下载结果CSV文件",
-            data=csv,
-            file_name='summary.csv',
-            mime='text/csv',
-        )
+        #st.download_button(
+        #    label="下载结果CSV文件",
+        #    data=csv,
+        #    file_name='summary.csv',
+        #    mime='text/csv',
+        #)
 
 if __name__ == "__main__":
     main()
