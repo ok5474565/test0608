@@ -60,8 +60,8 @@ if uploaded_file is not None:
     csv = convert_df(summary)
     
     st.download_button(
-        label="下载结果CSV文件",
-        data=csv,
-        file_name='summary.csv',
-        mime='text/csv',
+        label="下载结果表格",
+        data=results.to_excel(index=True, engine='openpyxl'),
+        file_name='sp_results.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
