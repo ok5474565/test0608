@@ -5,7 +5,7 @@ from streamlit_echarts import st_echarts
 def main():
     st.title('读取S-P表格生成S-P曲线图echarts')
     # 上传文件
-    uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx", "csv"])
+    uploaded_file = st.file_uploader("上传 S-P 表格文件 (xlsx 或 csv)", type=["xlsx"])
 
     if uploaded_file is not None:
         # 读取文件
