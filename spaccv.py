@@ -1,55 +1,54 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
-def calculate_coefficients(df):
-    # 删除第一行和第一列
-    df = df.iloc[1:, 1:]
+# Function to calculate the required metrics
+def calculate_metrics(df):
+    # Drop the first row and first column
+    data = df.iloc[1:, 1:]
+    # Convert data to numeric
+    data = data.apply(pd.to_numeric)
     
-    # 计算平均值和标准差
-    average = df.mean()
-    std_dev = df.std()
-
-    # 计算差异系数（Coefficient of Variation）
-    cv = std_dev / average
-
-    # 计算注意系数，这里使用1 - 平均值，表示与平均表现的偏差
-    attention_coefficient = 1 - average
-
-    # 汇总计算结果
-    summary = pd.DataFrame({
-        'Average': average,
-        'Standard Deviation': std_dev,
-        'CV (Coefficient of Variation)': cv,
-        'Attention Coefficient': attention_coefficient
-    })
-
-    return summary
-
-def main():
-    st.title('读取S-P表格计算注意系数和差异系数')
-
-    # 上传文件
-    uploaded_file = st.file_uploader("上传 S - P 表格文件", type=["xlsx"])
+    # Calculate average and standard deviation
+    avg = data.mean(axis=0)
+    std_dev = data.std(axis=0)
     
-    if uploaded_file is not None:
-        try:
-            # 根据文件类型读取数据
-            if uploaded_file.name.endswith('.xlsx'):
-                df = pd.read_excel(uploaded_file)
-            else:
-                df = pd.read_csv(uploaded_file)
+    # Calculate caution index (1 - average score)
+    caution_index = 1 - avg
+    
+    # Calculate difference index (standard deviation / average score)
+    difference_index = std_dev / avg
+    
+    return avg, std_dev, caution_index, difference_index
 
-            st.write("上传的文件内容：")
-            st.dataframe(df)
+# Streamlit app
+st.title('S-P表格分析工具')
 
-            # 计算注意系数和差异系数
-            summary = calculate_coefficients(df)
-            
-            st.write("计算结果：")
-            st.dataframe(summary)
+# File upload
+uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
 
-        except Exception as e:
-            st.error(f"文件处理时出错: {e}")
-
-if __name__ == "__main__":
-    main()
+if uploaded_file is not None:
+    if uploaded_file.name.endswith('.xlsx'):
+        df = pd.read_excel(uploaded_file)
+    elif uploaded_file.name.endswith('.csv'):
+        df = pd.read_csv(uploaded_file)
+    
+    # Display the uploaded file
+    st.write("上传的表格数据:")
+    st.write(df)
+    
+    # Calculate metrics
+    avg, std_dev, caution_index, difference_index = calculate_metrics(df)
+    
+    # Display the results
+    st.write("平均值:")
+    st.write(avg)
+    
+    st.write("标准差:")
+    st.write(std_dev)
+    
+    st.write("注意系数:")
+    st.write(caution_index)
+    
+    st.write("差异系数:")
+    st.write(difference_index)
