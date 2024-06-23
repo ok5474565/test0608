@@ -48,7 +48,7 @@ def read_xlsx_file(uploaded_file):
         return None
 
 def main():
-    st.title("多编码在线文本分词与词云图生成小程序")
+    st.title("多编码在线文本分词与词云图生成")
 
     # 设置上传文件的按钮，支持txt、csv和xlsx文件
     uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xlsx"])
