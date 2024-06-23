@@ -3,55 +3,46 @@ import pandas as pd
 import numpy as np
 
 def main():
-    st.title("S-P 表格分析应用")
+    st.title("S-P 表格分析")
 
-    uploaded_file = st.file_uploader("请上传 xlsx 文件", type="xlsx")
+    uploaded_file = st.file_uploader("上传 XLSX 文件", type="xlsx")
 
-    if uploaded_file:
-        df = pd.read_excel(uploaded_file)
+    if uploaded_file is not None:
+        df = pd.read_excel(uploaded_file, header=None)
+        headers = df.iloc[0, 1:].values  # 获取题目名称
+        df = df.iloc[1:, 1:]  # 跳过第一行和第一列
 
-        # 获取题目名称（第一行）和学生姓名（第一列）
-        question_names = df.columns[1:].tolist()
-        student_names = df.iloc[:, 0].tolist()
+        st.write("原始数据")
+        st.dataframe(df)
 
-        # 仅保留答题数据（去掉第一行和第一列）
-        answer_data = df.iloc[:, 1:].values
-        
-        # 计算题目的平均值和标准差
-        mean_scores = answer_data.mean(axis=0)
-        std_scores = answer_data.std(axis=0)
+        # 计算各个题目的平均值和标准差
+        means = df.mean(axis=0)
+        stds = df.std(axis=0)
 
-        # 计算 P 指数（题目难度）
-        p_index = 1 - mean_scores
+        # 计算差异系数（P指数）
+        p_indexes = 1 - means
 
-        # 计算 D 指数（区分度）
-        total_scores = answer_data.sum(axis=1)
-        sorted_indices = np.argsort(total_scores)[::-1]
-        high_group_size = int(len(total_scores) * 0.27)
-        low_group_size = high_group_size
+        # 计算注意系数（D指数）
+        high_group = df.loc[df.sum(axis=1) >= df.sum(axis=1).median()]
+        low_group = df.loc[df.sum(axis=1) < df.sum(axis=1).median()]
+        d_indexes = high_group.mean(axis=0) - low_group.mean(axis=0)
 
-        high_group = answer_data[sorted_indices[:high_group_size], :]
-        low_group = answer_data[sorted_indices[-low_group_size:], :]
+        # 计算同质性指数（基于所有学生回答的标准差）
+        homogeneity_indexes = df.std(axis=1).mean()
 
-        high_group_mean = high_group.mean(axis=0)
-        low_group_mean = low_group.mean(axis=0)
-        d_index = high_group_mean - low_group_mean
-
-        # 计算同质性指数
-        homogeneity_index = 1 - std_scores
-
-        # 构建结果 DataFrame
-        results_df = pd.DataFrame({
-            '题目名称': question_names,
-            '平均值': mean_scores,
-            '标准差': std_scores,
-            '注意系数（D指数）': d_index,
-            '差异系数（P指数）': p_index,
-            '同质性指数': homogeneity_index
+        # 汇总结果并添加题目名称
+        results = pd.DataFrame({
+            '题目名称': headers,
+            '平均值': means,
+            '标准差': stds,
+            '注意系数': d_indexes,
+            '差异系数': p_indexes
         })
 
-        st.write("分析结果：")
-        st.dataframe(results_df)
+        st.write("计算结果")
+        st.dataframe(results)
+
+        st.write(f"同质性指数: {homogeneity_indexes}")
 
 if __name__ == "__main__":
     main()
