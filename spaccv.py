@@ -30,44 +30,38 @@ def calculate_metrics(df):
     return summary
 
 # Streamlit app
-def main():
-    st.title('S-P表格分析工具')
+st.title('S-P表格分析工具')
 
-    # File upload
-    uploaded_file = st.file_uploader("上传S-P表格文件（仅限xlsx格式）", type=["xlsx"])
+# File upload
+uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
 
-    if uploaded_file is not None:
+if uploaded_file is not None:
+    if uploaded_file.name.endswith('.xlsx'):
         df = pd.read_excel(uploaded_file)
-        
-        # Display the uploaded file
-        st.write("上传的表格数据:")
-        st.write(df)
-        
-        # Calculate metrics
-        summary = calculate_metrics(df)
-        
-        # Display the results
-        st.write("计算结果:")
-        st.write(summary)
-        
-        # Add a download button for xlsx
-        @st.cache_data
-        def convert_df_to_excel(df):
-            from io import BytesIO
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False, sheet_name='Sheet1')
-            processed_data = output.getvalue()
-            return processed_data
+    elif uploaded_file.name.endswith('.csv'):
+        df = pd.read_csv(uploaded_file)
+    
+    # Display the uploaded file
+    st.write("上传的表格数据:")
+    st.write(df)
+    
+    # Calculate metrics
+    summary = calculate_metrics(df)
+    
+    # Display the results
+    st.write("计算结果:")
+    st.write(summary)
+    
+    # Add a download button
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode('utf-8')
 
-        xlsx = convert_df_to_excel(summary)
-        
-        st.download_button(
-            label="下载结果XLSX文件",
-            data=xlsx,
-            file_name='summary.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        )
-
-if __name__ == "__main__":
-    main()
+    csv = convert_df(summary)
+    
+    st.download_button(
+        label="下载结果CSV文件",
+        data=csv,
+        file_name='summary.csv',
+        mime='text/csv',
+    )
