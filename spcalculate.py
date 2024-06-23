@@ -35,8 +35,8 @@ def main():
             '题目名称': headers,
             '平均值': means,
             '标准差': stds,
-            'D指数': d_indexes,
-            'P指数': p_indexes
+            '注意系数': d_indexes,
+            '差异系数': p_indexes
         })
 
         st.write("计算结果")
