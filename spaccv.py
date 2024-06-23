@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from io import BytesIO
 
 # Function to calculate the required metrics
 def calculate_metrics(df):
@@ -30,24 +29,15 @@ def calculate_metrics(df):
     
     return summary
 
-# Function to convert DataFrame to Excel
-def convert_df_to_excel(df):
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Sheet1')
-    return output.getvalue()
-
+# Streamlit app
 def main():
     st.title('S-P表格分析工具')
 
     # File upload
-    uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
+    uploaded_file = st.file_uploader("上传S-P表格文件（仅限xlsx格式）", type=["xlsx"])
 
     if uploaded_file is not None:
-        if uploaded_file.name.endswith('.xlsx'):
-            df = pd.read_excel(uploaded_file)
-        elif uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file)
+        df = pd.read_excel(uploaded_file)
         
         # Display the uploaded file
         st.write("上传的表格数据:")
@@ -60,15 +50,24 @@ def main():
         st.write("计算结果:")
         st.write(summary)
         
-        # Add a download button for Excel file
-        excel_data = convert_df_to_excel(summary)
+        # Add a download button for xlsx
+        @st.cache_data
+        def convert_df_to_excel(df):
+            from io import BytesIO
+            output = BytesIO()
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name='Sheet1')
+            processed_data = output.getvalue()
+            return processed_data
+
+        xlsx = convert_df_to_excel(summary)
         
         st.download_button(
-            label="下载结果Excel文件",
-            data=excel_data,
+            label="下载结果XLSX文件",
+            data=xlsx,
             file_name='summary.xlsx',
             mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
