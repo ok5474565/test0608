@@ -1,18 +1,18 @@
 import streamlit as st
 
 # 导入子文件中的主函数
-from newspachong666 import main as news_crawl_main          # 新闻爬虫
-from app_abstract import main as summary_main               # 爬虫生成摘要
-from app_bar2 import run as bar_chart_run                   # 爬虫生成条形图
-from app_worldcloud import run as wordcloud_run             # 爬虫生成词云图
+from newspachong666 import main as news_crawl_main          
+from app_abstract import main as summary_main               
+from app_bar2 import run as bar_chart_run                  
+from app_worldcloud import run as wordcloud_run         
 
-from tiaoxingtuall import main as tiaoxingtuall_main        # 上传文件生成条形图
-from ciyuntuall import main as ciyuntuall_main              # 上传文件生成词云图
+from tiaoxingtuall import main as tiaoxingtuall_main      
+from ciyuntuall import main as ciyuntuall_main            
 
-from spscore import main as spscore_main                    # 上传文件生成S-P表格
-from sppic import main as sppic_main                        # 上传S-P表格生成S-P曲线maplot
-from sppicecharts import main as sppicecharts_main          # 上传S-P表格生成S-P曲线echart
-from spaccv import main as spaccv_main                      # 计算注意系数和差异系数
+from spscore import main as spscore_main             
+from sppic import main as sppic_main                  
+from sppicecharts import main as sppicecharts_main        
+from spaccv import main as spaccv_main                   
 
 # from tiaoxingtuend import main as text_analysis_main  # 假设主函数名为main
 # from ciyuntuend import main as wordcloud_main  # 假设主函数名为main
