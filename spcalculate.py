@@ -22,27 +22,21 @@ def main():
         std_values = df.std(axis=1)
         
         # 计算难度系数（P 指数）
-        total_scores = df.sum(axis=0)
-        max_score = total_scores.max()
-        weighted_scores = df.multiply(total_scores / max_score, axis=1)
-        difficulty_index = weighted_scores.sum(axis=1) / df.shape[1]
+        difficulty_index = mean_values / df.max()
         
         # 计算注意系数（D 指数）
-        total_scores_sorted = total_scores.sort_values(ascending=False)
-        upper_group = df[total_scores_sorted.index[:len(total_scores_sorted)//2]]
-        lower_group = df[total_scores_sorted.index[len(total_scores_sorted)//2:]]
-        
-        high_group_proportion = upper_group.mean(axis=1)
-        low_group_proportion = lower_group.mean(axis=1)
-        
-        discrimination_index = high_group_proportion / (1 - low_group_proportion)
+        # 对每个项目的回答按分数进行排序
+        sorted_df = df.apply(lambda x: x.sort_values(ascending=False), axis=1)
+        upper_group = sorted_df.iloc[:, :len(df.columns)//2]
+        lower_group = sorted_df.iloc[:, len(df.columns)//2:]
+        discrimination_index = upper_group.mean(axis=1) - lower_group.mean(axis=1)
         
         # 计算相关系数（使用 Pearson 相关系数）
         correlation_matrix = df.T.corr()
         correlation_with_total = correlation_matrix.mean(axis=1)
         
         # 计算同质性指数（标准化后的方差）
-        homogeneity_index = df.var(axis=1) / df.mean(axis=1)
+        homogeneity_index = df.var(axis=1) / mean_values
         
         # 显示结果
         st.subheader("分析结果")
