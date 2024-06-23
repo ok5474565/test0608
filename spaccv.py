@@ -29,39 +29,43 @@ def calculate_metrics(df):
     
     return summary
 
-# Streamlit app
-st.title('S-P表格分析工具')
+# Main function
+def main():
+    st.title('S-P表格分析工具')
 
-# File upload
-uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
+    # File upload
+    uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
 
-if uploaded_file is not None:
-    if uploaded_file.name.endswith('.xlsx'):
-        df = pd.read_excel(uploaded_file)
-    elif uploaded_file.name.endswith('.csv'):
-        df = pd.read_csv(uploaded_file)
-    
-    # Display the uploaded file
-    st.write("上传的表格数据:")
-    st.write(df)
-    
-    # Calculate metrics
-    summary = calculate_metrics(df)
-    
-    # Display the results
-    st.write("计算结果:")
-    st.write(summary)
-    
-    # Add a download button
-    @st.cache_data
-    def convert_df(df):
-        return df.to_csv(index=False).encode('utf-8')
+    if uploaded_file is not None:
+        if uploaded_file.name.endswith('.xlsx'):
+            df = pd.read_excel(uploaded_file)
+        elif uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        
+        # Display the uploaded file
+        st.write("上传的表格数据:")
+        st.write(df)
+        
+        # Calculate metrics
+        summary = calculate_metrics(df)
+        
+        # Display the results
+        st.write("计算结果:")
+        st.write(summary)
+        
+        # Add a download button
+        @st.cache_data
+        def convert_df(df):
+            return df.to_csv(index=False).encode('utf-8')
 
-    csv = convert_df(summary)
-    
-    st.download_button(
-        label="下载结果CSV文件",
-        data=csv,
-        file_name='summary.csv',
-        mime='text/csv',
-    )
+        csv = convert_df(summary)
+        
+        st.download_button(
+            label="下载结果CSV文件",
+            data=csv,
+            file_name='summary.csv',
+            mime='text/csv',
+        )
+
+if __name__ == "__main__":
+    main()
