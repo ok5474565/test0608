@@ -29,8 +29,12 @@ def main():
         # 计算同质性指数（基于所有学生回答的标准差）
         homogeneity_indexes = df.std(axis=1).mean()
 
+        # 生成题目号
+        question_numbers = [f'题目{idx+1}' for idx in range(df.shape[1])]
+
         # 汇总结果
         results = pd.DataFrame({
+            '题目号': question_numbers,
             '平均值': means,
             '标准差': stds,
             'D指数': d_indexes,
