@@ -2,6 +2,32 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+def calculate_difficulty_index(df):
+    # 计算差异系数（P指数），即每个题目的平均答对率
+    return df.mean(axis=0)
+
+def calculate_discrimination_index(df, num_top=27, num_bottom=27):
+    # 计算总分，并根据总分排序以划分高分组和低分组
+    total_scores = df.sum(axis=0)  # 计算每个学生的总分
+    sorted_total_scores = total_scores.sort_values(ascending=False)  # 总分降序排序
+    sorted_df = df.loc[sorted_total_scores.index]  # 根据总分排序的原始数据
+
+    # 划分高分组和低分组
+    num_students = len(total_scores)
+    top_index = int((num_students * num_top) / 100)
+    bottom_index = int((num_students * num_bottom) / 100)
+    
+    top_group = sorted_df.iloc[-top_index:]  # 高分组
+    bottom_group = sorted_df.iloc[:bottom_index]  # 低分组
+
+    # 计算高分组和低分组的答对率
+    top_group_correct_rate = top_group.mean(axis=1)
+    bottom_group_correct_rate = bottom_group.mean(axis=1)
+    
+    # 计算D指数，即高分组答对率与低分组答对率的比值
+    d_index = (top_group_correct_rate - bottom_group_correct_rate) / bottom_group_correct_rate
+    return d_index
+
 def main():
     st.title("S-P 表格分析工具")
     
@@ -17,45 +43,18 @@ def main():
         # 转置 DataFrame，使其与原始上传的表格结构一致
         df = df.T
         
-        # 计算平均值和标准差
-        mean_values = df.mean(axis=1)
-        std_values = df.std(axis=1)
+        # 计算难度系数（P指数）
+        difficulty_index = calculate_difficulty_index(df)
         
-        # 计算难度系数（P 指数）
-        difficulty_index = df.mean(axis=1)
-        
-        # 按总得分对学生排序
-        df['total_score'] = df.sum(axis=1)
-        df = df.sort_values(by='total_score', ascending=False)
-        df = df.drop(columns=['total_score'])
-        
-        # 高分组和低分组
-        n_students = len(df.columns)
-        upper_group = df.iloc[:, :n_students//2]
-        lower_group = df.iloc[:, n_students//2:]
-        
-        # 计算注意系数（D 指数）
-        upper_mean = upper_group.mean(axis=1)
-        lower_mean = lower_group.mean(axis=1)
-        discrimination_index = upper_mean - lower_mean
-        
-        # 计算相关系数（使用 Pearson 相关系数）
-        correlation_matrix = df.T.corr()
-        correlation_with_total = correlation_matrix.mean(axis=1)
-        
-        # 计算同质性指数（标准化后的方差）
-        homogeneity_index = df.var(axis=1) / df.mean(axis=1)
+        # 计算注意系数（D指数）
+        discrimination_index = calculate_discrimination_index(df)
         
         # 显示结果
         st.subheader("分析结果")
         result_df = pd.DataFrame({
-            '平均值': mean_values,
-            '标准差': std_values,
-            '难度系数 (P 指数)': difficulty_index,
-            '注意系数 (D 指数)': discrimination_index,
-            '相关系数': correlation_with_total,
-            '同质性指数': homogeneity_index
-        })
+            '难度系数 (P指数)': difficulty_index,
+            '注意系数 (D指数)': discrimination_index
+        }, index=df.columns)
         st.dataframe(result_df)
 
 if __name__ == "__main__":
