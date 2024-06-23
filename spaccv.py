@@ -22,7 +22,7 @@ def calculate_metrics(df):
     return avg, std_dev, caution_index, difference_index
 
 # Streamlit app
-st.title('S-P表格分析工具')
+st.title('S-P表格计算注意系数和差异系数')
 
 # File upload
 uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
