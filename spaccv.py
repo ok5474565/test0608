@@ -31,7 +31,7 @@ def calculate_metrics(df):
 
 # Main function
 def main():
-    st.title('S-P表格分析工具')
+    st.title('注意系数与差异系数分析工具')
 
     # File upload
     uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
