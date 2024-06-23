@@ -3,46 +3,44 @@ import pandas as pd
 import numpy as np
 
 def main():
-    st.title("计算注意系数及差异系数")
+    st.title("S-P 表格分析")
 
-    uploaded_file = st.file_uploader("上传 XLSX 文件", type="xlsx")
+    # 上传文件
+    uploaded_file = st.file_uploader("上传一个 Excel 文件", type="xlsx")
 
     if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file, header=None)
-        headers = df.iloc[0, 1:].values  # 获取题目名称
-        df = df.iloc[1:, 1:]  # 跳过第一行和第一列
+        # 读取Excel文件
+        df = pd.read_excel(uploaded_file)
+        
+        # 获取题目名称和学生姓名
+        question_names = df.columns[1:]
+        student_names = df.iloc[:, 0]
+        
+        # 获取答题数据
+        data = df.iloc[:, 1:].values
 
-        st.write("原始数据")
-        st.dataframe(df)
+        # 计算每题的平均值和标准差
+        mean_scores = np.mean(data, axis=0)
+        std_devs = np.std(data, axis=0)
+        
+        # 计算注意系数、差异系数和同质性指数
+        discrimination_coefficient = 1 - np.var(data, axis=0) / np.mean(data, axis=0)
+        variation_coefficient = std_devs / mean_scores
+        homogeneity_index = 1 - std_devs / np.sqrt(mean_scores * (1 - mean_scores))
 
-        # 计算各个题目的平均值和标准差
-        means = df.mean(axis=0)
-        stds = df.std(axis=0)
-
-        # 计算差异系数（P指数）
-        p_indexes = 1 - means
-
-        # 计算注意系数（D指数）
-        high_group = df.loc[df.sum(axis=1) >= df.sum(axis=1).median()]
-        low_group = df.loc[df.sum(axis=1) < df.sum(axis=1).median()]
-        d_indexes = high_group.mean(axis=0) - low_group.mean(axis=0)
-
-        # 计算同质性指数（基于所有学生回答的标准差）
-        homogeneity_indexes = df.std(axis=1).mean()
-
-        # 汇总结果并添加题目名称
+        # 汇总计算结果
         results = pd.DataFrame({
-            '题目名称': headers,
-            '平均值': means,
-            '标准差': stds,
-            '注意系数': d_indexes,
-            '差异系数': p_indexes
+            "题目名称": question_names,
+            "平均值": mean_scores,
+            "标准差": std_devs,
+            "注意系数": discrimination_coefficient,
+            "差异系数": variation_coefficient,
+            "同质性指数": homogeneity_index
         })
 
-        st.write("计算结果")
+        # 显示结果表格
+        st.write("计算结果：")
         st.dataframe(results)
-
-        st.write(f"同质性指数: {homogeneity_indexes}")
 
 if __name__ == "__main__":
     main()
