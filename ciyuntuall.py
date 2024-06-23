@@ -15,7 +15,7 @@ def get_top_words(words, top_k):
 
 # 定义读取TXT文件内容的函数，尝试多种编码格式
 def read_txt_file(uploaded_file):
-    encodings = ['utf-8', 'ANSI']
+    encodings = ['utf-8', 'ANSI', 'gbk', 'gb2312']
     for encoding in encodings:
         try:
             text = uploaded_file.read().decode(encoding)
@@ -28,7 +28,7 @@ def read_txt_file(uploaded_file):
 
 # 定义读取CSV文件内容的函数，尝试多种编码格式
 def read_csv_file(uploaded_file):
-    encodings = ['utf-8', 'gbk']
+    encodings = ['utf-8', 'gbk', 'ANSI', 'gb2312']
     for encoding in encodings:
         try:
             data = pd.read_csv(uploaded_file, encoding=encoding)
@@ -37,6 +37,15 @@ def read_csv_file(uploaded_file):
             st.warning(f"尝试用编码 {encoding} 读取CSV文件失败：{e}")
     st.error("无法读取CSV文件，请检查文件编码格式。")
     return None
+
+# 定义读取XLS文件内容的函数
+def read_xls_file(uploaded_file):
+    try:
+        data = pd.read_excel(uploaded_file, engine='xlrd')
+        return [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设XLS文件只有一列评论
+    except Exception as e:
+        st.error(f"读取XLS文件时发生错误：{e}")
+        return None
 
 # 定义读取XLSX文件内容的函数
 def read_xlsx_file(uploaded_file):
@@ -50,8 +59,8 @@ def read_xlsx_file(uploaded_file):
 def main():
     st.title("在线文本分词与词云图生成小程序")
 
-    # 设置上传文件的按钮，支持txt、csv和xlsx文件
-    uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xlsx"])
+    # 设置上传文件的按钮，支持txt、csv、xls和xlsx文件
+    uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xls", "xlsx"])
 
     words = []
     if uploaded_file is not None:
@@ -61,6 +70,8 @@ def main():
             comments = read_txt_file(uploaded_file)
         elif file_type == 'csv':
             comments = read_csv_file(uploaded_file)
+        elif file_type == 'vnd.ms-excel':
+            comments = read_xls_file(uploaded_file)
         elif file_type == 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
             comments = read_xlsx_file(uploaded_file)
         else:
