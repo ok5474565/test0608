@@ -8,23 +8,27 @@ def calculate_discrimination_index(df):
     
     # 确定高分组和低分组的分界点
     num_students = len(total_scores)
-    top_split = num_students * 0.27  # 假设高分组为前27%
-    bottom_split = num_students * 0.73  # 假设低分组为后27%
+    top_split = int(num_students * 0.27)  # 假设高分组为前27%
+    bottom_split = int(num_students * 0.73)  # 假设低分组为后27%
     
     # 获取高分组和低分组的索引
-    top_indices = total_scores.nlargest(int(top_split))..index
-    bottom_indices = total_scores.nsmallest(int(bottom_split))..index
+    top_indices = total_scores.nlargest(top_split).index
+    bottom_indices = total_scores.nsmallest(bottom_split).index
     
     # 计算高分组和低分组的答对率
-    top_group = df.loc[total_scores >= total_scores[top_indices[-1]]]
-    bottom_group = df.loc[total_scores <= total_scores[bottom_indices[0]]]
+    top_group = df.loc[bottom_indices]  # 注意：这里选择的是总分低的学生
+    bottom_group = df.loc[top_indices]  # 注意：这里选择的是总分高的学生
     
-    top_correct_rate = (top_group.sum(axis=0) / len(top_indices)).values
-    bottom_correct_rate = (bottom_group.sum(axis=0) / len(bottom_indices)).values
+    top_correct_rate = top_group.mean(axis=1)
+    bottom_correct_rate = bottom_group.mean(axis=1)
     
     # 计算D指数
-    d_index = np.divide(top_correct_rate - bottom_correct_rate, bottom_correct_rate, out=np.zeros(len(df.columns)), where=bottom_correct_rate!=0)
+    d_index = (top_correct_rate - bottom_correct_rate) / bottom_correct_rate
+    
+    # 避免除以零的错误
+    d_index = d_index.replace([np.inf, -np.inf], np.nan).fillna(0)
     return d_index
+
 
 def calculate_difficulty_index(df):
     # 计算每个题目的平均答对率
