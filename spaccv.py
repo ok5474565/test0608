@@ -1,63 +1,67 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from scipy.stats import pearsonr
 
+# Function to calculate the required metrics
 def calculate_metrics(df):
-    # 计算平均值（题目平均得分）
-    avg_scores = df.mean()
+    # Drop the first row and first column
+    data = df.iloc[1:, 1:]
+    # Convert data to numeric
+    data = data.apply(pd.to_numeric)
     
-    # 计算相关系数（学生答题情况与题目难度之间的关系）
-    difficulties = 1 - avg_scores
-    student_scores = df.sum(axis=1)
-    correlation, _ = pearsonr(student_scores, difficulties)
+    # Calculate average and standard deviation
+    avg = data.mean(axis=0)
+    std_dev = data.std(axis=0)
     
-    # 计算差异指数（反映学生答题情况的离散程度）
-    variability_index = student_scores.var()
+    # Calculate caution index (1 - average score)
+    caution_index = 1 - avg
     
-    # 计算同质性指数（评估学生群体在答题上是否具有相似性）
-    homogeneity_index = df.var(axis=1).mean()
+    # Calculate difference index (standard deviation / average score)
+    difference_index = std_dev / avg
     
-    # 计算项目注意系数（针对每个题目，衡量该题目对整体教学评价的影响程度）
-    item_attention_index = df.var()
+    # Combine results into a single DataFrame
+    summary = pd.DataFrame({
+        'Average': avg,
+        'Standard Deviation': std_dev,
+        'Caution Index': caution_index,
+        'Difference Index': difference_index
+    })
     
-    # 计算学生注意系数（针对每个学生，衡量该学生在整体评价中的表现和问题）
-    student_attention_index = df.var(axis=1)
-    
-    return avg_scores, correlation, variability_index, homogeneity_index, item_attention_index, student_attention_index
+    return summary
 
-def main():
-    st.title('S-P 表格分析工具')
-    
-    uploaded_file = st.file_uploader("上传一个 S-P 表格文件（xlsx 格式）", type="xlsx")
-    
-    if uploaded_file:
-        df = pd.read_excel(uploaded_file, header=1, index_col=0)
-        
-        avg_scores, correlation, variability_index, homogeneity_index, item_attention_index, student_attention_index = calculate_metrics(df)
-        
-        # 创建结果表格
-        results = pd.DataFrame({
-            '题目平均得分': avg_scores,
-            '项目注意系数': item_attention_index
-        })
-        
-        # 显示结果
-        st.write("相关系数（学生答题情况与题目难度之间的关系）: ", correlation)
-        st.write("差异指数（反映学生答题情况的离散程度）: ", variability_index)
-        st.write("同质性指数（评估学生群体在答题上是否具有相似性）: ", homogeneity_index)
-        st.write("学生注意系数（针对每个学生，衡量该学生在整体评价中的表现和问题）: ")
-        st.write(student_attention_index)
-        st.write("合并结果表格: ")
-        st.write(results)
-        
-        # 提供下载按钮
-        st.download_button(
-            label="下载结果表格",
-            data=results.to_excel(index=True, engine='openpyxl'),
-            file_name='sp_results.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+# Streamlit app
+st.title('S-P表格分析工具')
 
-if __name__ == "__main__":
-    main()
+# File upload
+uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
+
+if uploaded_file is not None:
+    if uploaded_file.name.endswith('.xlsx'):
+        df = pd.read_excel(uploaded_file)
+    elif uploaded_file.name.endswith('.csv'):
+        df = pd.read_csv(uploaded_file)
+    
+    # Display the uploaded file
+    st.write("上传的表格数据:")
+    st.write(df)
+    
+    # Calculate metrics
+    summary = calculate_metrics(df)
+    
+    # Display the results
+    st.write("计算结果:")
+    st.write(summary)
+    
+    # Add a download button
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode('utf-8')
+
+    csv = convert_df(summary)
+    
+    st.download_button(
+        label="下载结果CSV文件",
+        data=csv,
+        file_name='summary.csv',
+        mime='text/csv',
+    )
