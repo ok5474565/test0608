@@ -19,10 +19,18 @@ def calculate_metrics(df):
     # Calculate difference index (standard deviation / average score)
     difference_index = std_dev / avg
     
-    return avg, std_dev, caution_index, difference_index
+    # Combine results into a single DataFrame
+    summary = pd.DataFrame({
+        'Average': avg,
+        'Standard Deviation': std_dev,
+        'Caution Index': caution_index,
+        'Difference Index': difference_index
+    })
+    
+    return summary
 
 # Streamlit app
-st.title('S-P表格计算注意系数和差异系数')
+st.title('S-P表格分析工具')
 
 # File upload
 uploaded_file = st.file_uploader("上传S-P表格文件（xlsx或csv格式）", type=["xlsx", "csv"])
@@ -38,17 +46,22 @@ if uploaded_file is not None:
     st.write(df)
     
     # Calculate metrics
-    avg, std_dev, caution_index, difference_index = calculate_metrics(df)
+    summary = calculate_metrics(df)
     
     # Display the results
-    st.write("平均值:")
-    st.write(avg)
+    st.write("计算结果:")
+    st.write(summary)
     
-    st.write("标准差:")
-    st.write(std_dev)
+    # Add a download button
+    @st.cache_data
+    def convert_df(df):
+        return df.to_csv(index=False).encode('utf-8')
+
+    csv = convert_df(summary)
     
-    st.write("注意系数:")
-    st.write(caution_index)
-    
-    st.write("差异系数:")
-    st.write(difference_index)
+    st.download_button(
+        label="下载结果CSV文件",
+        data=csv,
+        file_name='summary.csv',
+        mime='text/csv',
+    )
