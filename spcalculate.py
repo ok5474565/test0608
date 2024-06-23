@@ -7,26 +7,34 @@ def calculate_difficulty_index(df):
     return df.mean(axis=0)
 
 def calculate_discrimination_index(df, num_top=27, num_bottom=27):
-    # 计算总分，并根据总分排序以划分高分组和低分组
-    total_scores = df.sum(axis=0)  # 计算每个学生的总分
-    sorted_total_scores = total_scores.sort_values(ascending=False)  # 总分降序排序
-    sorted_df = df.loc[sorted_total_scores.index]  # 根据总分排序的原始数据
-
-    # 划分高分组和低分组
-    num_students = len(total_scores)
-    top_index = int((num_students * num_top) / 100)
-    bottom_index = int((num_students * num_bottom) / 100)
+    # 计算每个学生的总分
+    total_scores = df.sum(axis=1)
     
-    top_group = sorted_df.iloc[-top_index:]  # 高分组
-    bottom_group = sorted_df.iloc[:bottom_index]  # 低分组
-
+    # 根据总分排序以划分高分组和低分组
+    sorted_student_indices = total_scores.sort_values(ascending=False).index
+    top_index = int((len(total_scores) * num_top) / 100)
+    bottom_index = int((len(total_scores) * num_bottom) / 100)
+    
+    # 选择高分组和低分组的学生
+    top_group_mask = df.index.isin(sorted_student_indices[-top_index:])
+    bottom_group_mask = df.index.isin(sorted_student_indices[:bottom_index])
+    
     # 计算高分组和低分组的答对率
-    top_group_correct_rate = top_group.mean(axis=1)
-    bottom_group_correct_rate = bottom_group.mean(axis=1)
+    top_group_scores = df.loc[top_group_mask]
+    bottom_group_scores = df.loc[bottom_group_mask]
     
-    # 计算D指数，即高分组答对率与低分组答对率的比值
-    d_index = (top_group_correct_rate - bottom_group_correct_rate) / bottom_group_correct_rate
-    return d_index
+    top_group_correct_rate = top_group_scores.mean(axis=0)
+    bottom_group_correct_rate = bottom_group_scores.mean(axis=0)
+    
+    # 注意系数 D 指数计算公式
+    # 这里我们使用高分组和低分组的答对率的差值来表示区分度
+    d_index = top_group_correct_rate - bottom_group_correct_rate
+    
+    # 为了避免除以零，我们只返回有有效数据的 D 指数
+    valid_d_index = d_index[(d_index >= 0) & (bottom_group_correct_rate > 0)]
+    
+    return valid_d_index
+
 
 def main():
     st.title("S-P 表格分析工具")
