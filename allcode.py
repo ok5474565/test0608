@@ -36,6 +36,14 @@ function_options = [
     "文本简要总结",
     "输入链接爬取内容统计词频条形图",
     "输入链接爬取内容生成词云图",
+    "在线文本分词与高频词统计",
+    "在线文本分词与词云图生成",
+    "根据得分统计表制作S - P表格",
+    "根据S-P表格使用maplotlib绘制S-P曲线",
+    "根据S-P表格使用echarts绘制S-P曲线",
+    "根据表格计算注意系数、差异系数"
+
+
     # "在线文本分词与高频词统计小程序",  # 新增功能名称
     # "在线文本分词与词云图生成小程序",  # 新增功能名称
     # "读取txt统计高频词生成条形图",
@@ -60,9 +68,18 @@ elif selected_option == "输入链接爬取内容统计词频条形图":
     bar_chart_run()
 elif selected_option == "输入链接爬取内容生成词云图":
     wordcloud_run()
-
-
-
+elif selected_option == "在线文本分词与高频词统计":
+    tiaoxingtuall_main()
+elif selected_option == "在线文本分词与词云图生成":
+    ciyuntuall_main()
+elif selected_option == "根据得分统计表制作S - P表格":
+    spscore_main()
+elif selected_option == "根据S-P表格使用maplotlib绘制S-P曲线":
+    sppic_main()
+elif selected_option == "根据S-P表格使用echarts绘制S-P曲线":
+    sppicecharts_main()
+elif selected_option == "根据表格计算注意系数、差异系数":
+    spaccv_main()
 # elif selected_option == "在线文本分词与高频词统计小程序":
 #     text_analysis_main()
 # elif selected_option == "在线文本分词与词云图生成小程序":
