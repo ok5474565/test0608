@@ -29,7 +29,7 @@ def main():
     st.title('读取S-P表格计算注意系数和差异系数')
 
     # 上传文件
-    uploaded_file = st.file_uploader("上传一个xlsx或csv文件", type=["xlsx", "csv"])
+    uploaded_file = st.file_uploader("请上传您的xlsx文件", type=["xlsx"])
     
     if uploaded_file is not None:
         try:
