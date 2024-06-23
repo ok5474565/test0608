@@ -14,3 +14,4 @@ spicy==0.16.0
 chardet==5.2.0
 openpyxl==3.1.2
 seaborn==0.13.2
+XlsxWriter==3.2.0
