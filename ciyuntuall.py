@@ -38,15 +38,6 @@ def read_csv_file(uploaded_file):
     st.error("无法读取CSV文件，请检查文件编码格式。")
     return None
 
-# 定义读取XLS文件内容的函数
-def read_xls_file(uploaded_file):
-    try:
-        data = pd.read_excel(uploaded_file, engine='xlrd')
-        return [str(cell) for cell in data.iloc[:, 0].tolist()]  # 假设XLS文件只有一列评论
-    except Exception as e:
-        st.error(f"读取XLS文件时发生错误：{e}")
-        return None
-
 # 定义读取XLSX文件内容的函数
 def read_xlsx_file(uploaded_file):
     try:
@@ -57,10 +48,10 @@ def read_xlsx_file(uploaded_file):
         return None
 
 def main():
-    st.title("在线文本分词与词云图生成小程序")
+    st.title("多编码在线文本分词与词云图生成小程序")
 
-    # 设置上传文件的按钮，支持txt、csv、xls和xlsx文件
-    uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xls", "xlsx"])
+    # 设置上传文件的按钮，支持txt、csv和xlsx文件
+    uploaded_file = st.file_uploader("请上传你的文件", type=["txt", "csv", "xlsx"])
 
     words = []
     if uploaded_file is not None:
@@ -70,8 +61,6 @@ def main():
             comments = read_txt_file(uploaded_file)
         elif file_type == 'csv':
             comments = read_csv_file(uploaded_file)
-        elif file_type == 'vnd.ms-excel':
-            comments = read_xls_file(uploaded_file)
         elif file_type == 'vnd.openxmlformats-officedocument.spreadsheetml.sheet':
             comments = read_xlsx_file(uploaded_file)
         else:
