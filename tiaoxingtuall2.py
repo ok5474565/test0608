@@ -49,23 +49,26 @@ def run():
     # 侧边栏添加滑块控件，动态选择显示的词数量
     top_k = st.sidebar.slider("选择要显示的词数量", 1, 100, 20, 5)
 
+    bar_chart_options = None  # 初始化变量
+
     if url:
-        r = requests.get(url)
-        r.encoding = 'utf-8'
-        text = r.text
-        text = extract_body_text(text)
-        
-        text = remove_html_tags(text)
-        text = clean_text(text)
+        # 尝试请求 URL 并处理文本
+        try:
+            r = requests.get(url)
+            r.encoding = 'utf-8'
+            text = r.text
+            text = extract_body_text(text)
+            text = remove_html_tags(text)
+            text = clean_text(text)
 
-        stopwords_filepath = Path(__file__).parent / "stopwords.txt"
-        stopwords = load_stopwords(stopwords_filepath)
+            stopwords_filepath = Path(__file__).parent / "stopwords.txt"
+            stopwords = load_stopwords(stopwords_filepath)
 
-        words = segment(text, stopwords)
-        word_counts = Counter(words)
+            words = segment(text, stopwords)
+            word_counts = Counter(words)
 
-        # 根据用户选择动态显示前top_k个词
-        top_words = word_counts.most_common(top_k)
+            # 根据用户选择动态显示前top_k个词
+            top_words = word_counts.most_common(top_k)
 
         # 准备条形图配置
         bar_chart_options = {
