@@ -50,8 +50,8 @@ def generate_wordcloud(word_counts, top_k, font_path):
         max_words=top_k,
         max_font_size=100,
         random_state=42,
-        width=800,
-        height=400,
+        width=1600,
+        height=1200,
         colormap='viridis'
     ).generate_from_frequencies(word_counts)
 
