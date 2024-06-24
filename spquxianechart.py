@@ -48,5 +48,5 @@ if uploaded_file is not None:
     )
 
     st.write("S-P 曲线图：")
-    st_pyecharts(line)
+    st.write(line)
 
