@@ -102,7 +102,7 @@ def run():
         # 重新生成词云图
         def update_wordcloud():
             wordcloud = WordCloud(
-                font_path='path/to/your/chinese/font.ttf',  # 指定字体路径
+                font_path='simhei.ttf',  # 指定字体路径
                 background_color='white',
                 max_words=top_k,
                 max_font_size=None,
