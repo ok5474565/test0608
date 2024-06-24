@@ -6,6 +6,7 @@ from matplotlib.font_manager import FontProperties
 font_path = 'simhei.ttf'
 chinese_font = FontProperties(fname=font_path, size=14)
 
+def main():
 st.title('S-P 曲线图生成器')
 
 # 上传文件
@@ -50,3 +51,6 @@ if uploaded_file:
     plt.tight_layout()
     
     st.pyplot(plt)
+    
+if __name__ == "__main__":
+    main()
