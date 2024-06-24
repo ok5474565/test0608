@@ -39,5 +39,9 @@ def main():
         # 使用 Streamlit ECharts 显示图表
         st_echarts(options=line_chart.dump_options(), height="500px")
 
+        st.write(line_chart.render_embed())
+        st.write(s_curve)
+        st.write(p_curve)
+
 if __name__ == "__main__":
     main()
