@@ -1,52 +1,57 @@
-import streamlit as st
 import pandas as pd
-from pyecharts.charts import Line
-from pyecharts import options as opts
-import numpy as np
-from streamlit_echarts import st_echarts
+import streamlit as st
+from echarts.charts import Bar
+from echarts import Options
 
-def load_data(uploaded_file):
-    # 读取数据，跳过第一行第一列
-    data = pd.read_excel(uploaded_file, index_col=0, header=0)
-    # 计算每一行和每一列的总得分
-    data['总得分'] = data.sum(axis=1)
-    data.loc['总得分'] = data.sum(axis=0)
-    return data
+# 读取Excel文件
+def read_excel(file_path):
+    return pd.read_excel(file_path)
 
-def generate_sp_chart(data):
-    # 计算每位用户的正确率
-    scores = data.loc[:, data.columns != '总得分']
-    total_questions = len(scores.columns)
-    scores['正确率'] = scores.sum(axis=1) / total_questions
+# 统计得分并添加到DataFrame
+def calculate_scores(df):
+    # 忽略第一行和第一列
+    df = df.iloc[1:, 1:]
+    # 计算每列的得分
+    column_scores = df.sum(axis=0)
+    # 计算每行的得分
+    row_scores = df.sum(axis=1)
+    # 将列得分添加到DataFrame
+    df['Total'] = column_scores
+    # 将行得分添加到DataFrame
+    df.loc['Average'] = row_scores.mean()
+    return df
 
-    # 准备数据
-    sorted_scores = scores['正确率'].sort_values()
-    count = len(sorted_scores)
-    x_data = [(i+1)/count for i in range(count)]
-    y_data = sorted_scores.tolist()
-
-    # 创建图表
-    chart = Line()
-    chart.add_xaxis(x_data)
-    chart.add_yaxis("正确率", y_data)
-    chart.set_global_opts(
-        title_opts=opts.TitleOpts(title="S-P 曲线图"),
-        xaxis_opts=opts.AxisOpts(name="百分位"),
-        yaxis_opts=opts.AxisOpts(name="正确率"),
-    )
+# 绘制S-P曲线图
+def plot_sp_curve(df):
+    # 这里假设我们使用Bar来绘制，实际上echarts-python可能需要调整以适应S-P曲线
+    chart = Bar(init_opts=Options(width="1000px", height="600px"))
+    chart.add_xaxis(df.index.tolist())
+    chart.add_yaxis("Scores", df['Total'].tolist())
+    chart.add_yaxis("Average", [df.loc['Average']]*len(df))
     return chart
 
+# Streamlit界面
 def main():
-    st.title("S-P 曲线图生成器")
-
-    uploaded_file = st.file_uploader("请选择一个Excel文件", type="xlsx")
-    if uploaded_file:
-        data = load_data(uploaded_file)
-        st.write("数据预览（包含总得分）：", data)
-
+    st.title("S-P Curve Generator")
+    
+    # 上传Excel文件
+    uploaded_file = st.file_uploader("Choose an Excel file", type=["xlsx"])
+    
+    if uploaded_file is not None:
+        # 读取文件
+        df = read_excel(uploaded_file)
+        
+        # 计算得分并更新DataFrame
+        df = calculate_scores(df)
+        
         # 绘制S-P曲线图
-        chart = generate_sp_chart(data)
-        st_echarts(options=chart.dump_options(), height="500px")
+        sp_curve = plot_sp_curve(df)
+        
+        # 显示DataFrame
+        st.write(df)
+        
+        # 显示S-P曲线图
+        st.pyplot(sp_curve.render_embed())
 
 if __name__ == "__main__":
     main()
