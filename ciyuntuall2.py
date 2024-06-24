@@ -66,8 +66,8 @@ def run():
     st.title("输入链接爬取内容生成词云图")
 
     # 从侧边栏添加滑块控件
-    min_frequency = 1  # 根据需要调整
-    max_frequency = 100  # 根据需要调整
+    min_frequency = 30  # 根据需要调整
+    max_frequency = 200  # 根据需要调整
     default_top_k = 50
     top_k = st.sidebar.slider("选择要显示的词数量", min_frequency, max_frequency, default_top_k)
 
