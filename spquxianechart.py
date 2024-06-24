@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from st_echarts import ECharts, StGrid, StLine
+from pyecharts.charts import Line
+from pyecharts import options as opts
 
 def main():
     st.title('S-P 曲线图生成器')
