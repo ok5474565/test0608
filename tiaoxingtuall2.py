@@ -7,6 +7,7 @@ from streamlit.logger import get_logger
 import re
 import string
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 # 获取日志器
 LOGGER = get_logger(__name__)
@@ -35,21 +36,18 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 
 def extract_body_text(html):
-    from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.find('body').get_text()
     return text
 
 def run():
-    #st.set_page_config(
-     #   page_title="文本分析工具",
-      #  page_icon=":bar_chart:"
-    #)
-    
     st.title("输入链接爬取内容统计词频条形图")
 
+    # 用户输入网址
     url = st.text_input('输入新闻URL：')
-    bar_chart_options = {}  # 初始化为空字典
+
+    # 侧边栏添加滑块控件，动态选择显示的词数量
+    top_k = st.sidebar.slider("选择要显示的词数量", 1, 100, 20, 5)
 
     if url:
         r = requests.get(url)
@@ -66,7 +64,8 @@ def run():
         words = segment(text, stopwords)
         word_counts = Counter(words)
 
-        top_words = word_counts.most_common(20)
+        # 根据用户选择动态显示前top_k个词
+        top_words = word_counts.most_common(top_k)
 
         # 准备条形图配置
         bar_chart_options = {
