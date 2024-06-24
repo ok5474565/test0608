@@ -1,7 +1,3 @@
-下面代码生成的效果并不是我想要的
-
-我想要的是，拖动滑块，会重新生成不同的词云图，而不是在原来的图片上增加新的词语
-
 import jieba
 import requests
 import streamlit as st
