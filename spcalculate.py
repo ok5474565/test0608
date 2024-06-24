@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 def main():
-    st.title("计算注意系数及差异系数")
+    st.title("计算区分度及题目难度")
 
     uploaded_file = st.file_uploader("请上传 xlsx 文件", type="xlsx")
 
@@ -45,8 +45,8 @@ def main():
             '题目名称': question_names,
             '平均值': mean_scores,
             '标准差': std_scores,
-            '注意系数（D指数）': d_index,
-            '差异系数（P指数）': p_index,
+            '区分度（D指数）': d_index,
+            '题目难度（P指数）': p_index,
             '同质性指数': homogeneity_index
         })
 
