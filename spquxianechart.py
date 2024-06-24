@@ -3,6 +3,7 @@ import pandas as pd
 from pyecharts.charts import Line
 from pyecharts import options as opts
 import numpy as np
+from streamlit_echarts import st_echarts
 
 def load_data(uploaded_file):
     # 读取数据，跳过第一行第一列
@@ -45,7 +46,7 @@ def main():
 
         # 绘制S-P曲线图
         chart = generate_sp_chart(data)
-        st_pyecharts(chart)
+        st_echarts(options=chart.dump_options(), height="500px")
 
 if __name__ == "__main__":
     main()
