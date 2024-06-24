@@ -91,47 +91,23 @@ def run():
         words = segment(text, stopwords)
         word_counts = Counter(words)
 
-        # 准备更新词云图
         def update_wordcloud():
-            # 清除之前的图表
-            plt.clf()
-            # 随机生成不同的 random_state 值
-            random_state = np.random.randint(0, 100)
-            wordcloud = WordCloud(
+            plt.clf()  # 清除之前的图像
+            # 重新生成词云图
+            wc = WordCloud(
                 font_path='simhei.ttf',  # 指定字体路径
                 background_color='white',
                 max_words=top_k,
-                max_font_size=None,
-                random_state=random_state,  # 使用随机生成的值
-                width=800,
-                height=600,
                 colormap='viridis'
             ).generate_from_frequencies(word_counts)
 
-            # 使用matplotlib显示词云图
-            plt.imshow(wordcloud, interpolation='bilinear')
+            plt.figure(figsize=(10, 5))
+            plt.imshow(wc, interpolation='bilinear')
             plt.axis('off')
 
         # 用于显示词云图的占位符
         wordcloud_placeholder = st.empty()
         update_wordcloud()  # 初始生成词云图
-
-        # 监听滑块的变化，并更新词云图
-        if 'top_k' in st.session_state:
-            if st.session_state.top_k != top_k:
-                st.session_state.top_k = top_k
-                update_wordcloud()
-                wordcloud_placeholder.pyplot(plt)
-        else:
-            st.session_state.top_k = top_k
-
-            # 使用matplotlib显示词云图
-            plt.figure(figsize=(10, 5))
-            plt.imshow(wordcloud, interpolation='bilinear')
-            plt.axis('off')
-
-        # 显示词云图
-        update_wordcloud()
         wordcloud_placeholder.pyplot(plt)
 
 if __name__ == "__main__":
