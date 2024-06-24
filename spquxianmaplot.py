@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
+
+font_path = 'simhei.ttf'
+chinese_font = FontProperties(fname=font_path, size=14)
 
 st.title('S-P 曲线图生成器')
 
@@ -39,10 +43,10 @@ if uploaded_file:
     plt.plot(s_curve_normalized_index, s_curve.values, 'r--', label='S 曲线 - 学生表现')
     plt.plot(p_curve_normalized_index, p_curve.values, 'b-', label='P 曲线 - 问题难度')
     
-    plt.xlabel('索引')
-    plt.ylabel('百分比')
-    plt.title('S-P 曲线图')
-    plt.legend()
+    plt.xlabel('索引', fontproperties=chinese_font)
+    plt.ylabel('百分比', fontproperties=chinese_font)
+    plt.title('S-P 曲线图', fontproperties=chinese_font)
+    plt.legend(prop=chinese_font)
     plt.tight_layout()
     
     st.pyplot(plt)
