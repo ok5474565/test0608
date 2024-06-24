@@ -7,7 +7,6 @@ from streamlit.logger import get_logger
 import re
 import string
 from pathlib import Path
-from bs4 import BeautifulSoup
 
 # 获取日志器
 LOGGER = get_logger(__name__)
@@ -36,68 +35,93 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 
 def extract_body_text(html):
+    from bs4 import BeautifulSoup
     soup = BeautifulSoup(html, 'html.parser')
     text = soup.find('body').get_text()
     return text
 
 def run():
-    # 设置页面标题和图标（可选）
-    st.set_page_config(page_title="文本分析工具", page_icon=":bar_chart:")
-
-    # 页面标题
     st.title("输入链接爬取内容统计词频条形图")
 
-    # 用户输入新闻链接
     url = st.text_input('输入新闻URL：')
-
-    # 初始化条形图配置字典
-    bar_chart_options = {
-        "title": {"text": "词语条形图"},
-        "tooltip": {"trigger": "axis", "axisPointer": {"type": "shadow"}},
-        "xAxis": {"type": "category", "axisLabel": {"interval": 0, "rotate": 45}, "splitLine": {"show": False}},
-        "yAxis": {"type": "value", "splitLine": {"show": False}},
-        "series": [{"type": "bar"}],
-    }
-
-    # 添加滑块，允许用户选择 top N 个词语
-    top_n = st.slider('选择要显示的 top N 个词语:', min_value=1, max_value=50, value=20)
+    bar_chart_options = {}  # 初始化为空字典
 
     if url:
-        try:
-            # 发送请求获取网页内容
-            response = requests.get(url)
-            response.raise_for_status()  # 确保请求成功
-            html_content = response.text
+        r = requests.get(url)
+        r.encoding = 'utf-8'
+        text = r.text
+        text = extract_body_text(text)
+        
+        text = remove_html_tags(text)
+        text = clean_text(text)
 
-            # 提取正文文本并清理
-            body_text = extract_body_text(html_content)
-            text = remove_html_tags(body_text)
-            text = clean_text(text)
+        stopwords_filepath = Path(__file__).parent / "stopwords.txt"
+        stopwords = load_stopwords(stopwords_filepath)
 
-            # 加载停用词
-            stopwords_filepath = Path(__file__).parent / "stopwords.txt"
-            stopwords = load_stopwords(stopwords_filepath)
+        words = segment(text, stopwords)
+        word_counts = Counter(words)
 
-            # 分词
-            words = segment(text, stopwords)
+        num_words = st.slider('选择显示的词语数量', min_value=5, max_value=50, value=20)  # 添加滑块选择器
+        top_words = word_counts.most_common(num_words)  # 根据滑块值调整词语数量
 
-            # 统计词频
-            word_counts = Counter(words)
+        # 准备条形图配置
+        bar_chart_options = {
+            "title": {
+                "text": "词语条形图"
+            },
+            "tooltip": {
+                "trigger": "axis",
+                "axisPointer": {
+                    "type": "shadow"
+                }
+            },
+            "xAxis": {
+                "type": "category",
+                "data": [word for word, _ in top_words],
+                "axisLabel": {
+                    "interval": 0,
+                    "rotate": 45
+                },
+                "splitLine": {"show": False},
+            },
+            "yAxis": {
+                "type": "value",
+                "splitLine": {"show": False},
+            },
+            "series": [{
+                "type": "bar",
+                "data": [count for _, count in top_words],
+                "itemStyle": {
+                    "normal": {
+                        "color": {
+                            "type": "linear",
+                            "x": 0,
+                            "y": 0,
+                            "x2": 0,
+                            "y2": 1,
+                            "colorStops": [{
+                                "offset": 0, "color": "rgba(255,0,0,1)"
+                            }, {
+                                "offset": 1, "color": "rgba(0,255,0,1)"
+                            }]
+                        }
+                    }
+                }
+            }],
+            "visualMap": {
+                "type": "continuous",
+                "min": min([count for _, count in top_words]),
+                "max": max([count for _, count in top_words]),
+                "calculable": True,
+                "inRange": {
+                    "color": ["#00796B", "#FBC02D", "#E53935"]
+                }
+            }
+        }
 
-            # 获取 top N 个词语及其频率
-            top_words = word_counts.most_common(top_n)
-
-            # 更新条形图配置
-            bar_chart_options["xAxis"]["data"] = [word for word, _ in top_words]
-            bar_chart_options["series"][0]["data"] = [count for _, count in top_words]
-
-            # 显示图表
-            st_echarts(bar_chart_options, height='600px')
-
-        except requests.RequestException as e:
-            st.error(f"请求错误: {e}")
-        except Exception as e:
-            st.error(f"发生错误: {e}")
+    # 显示图表
+    if 'series' in bar_chart_options:
+        st_echarts(bar_chart_options, height='600px')
 
 if __name__ == "__main__":
     run()
