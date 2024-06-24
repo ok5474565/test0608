@@ -48,7 +48,7 @@ def generate_wordcloud(word_counts, top_k, font_path):
         font_path=font_path,
         background_color='white',
         max_words=top_k,
-        max_font_size=100,
+        max_font_size=200,
         random_state=42,
         width=1600,
         height=1200,
