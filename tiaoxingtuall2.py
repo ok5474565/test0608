@@ -70,64 +70,64 @@ def run():
             # 根据用户选择动态显示前top_k个词
             top_words = word_counts.most_common(top_k)
 
-        # 准备条形图配置
-        bar_chart_options = {
-            "title": {
-                "text": "词语条形图"
-            },
-            "tooltip": {
-                "trigger": "axis",
-                "axisPointer": {
-                    "type": "shadow"
-                }
-            },
-            "xAxis": {
-                "type": "category",
-                "data": [word for word, _ in top_words],
-                "axisLabel": {
-                    "interval": 0,
-                    "rotate": 45
+            # 准备条形图配置
+            bar_chart_options = {
+                "title": {
+                    "text": "词语条形图"
                 },
-                "splitLine": {"show": False},
-            },
-            "yAxis": {
-                "type": "value",
-                "splitLine": {"show": False},
-            },
-            "series": [{
-                "type": "bar",
-                "data": [count for _, count in top_words],
-                "itemStyle": {
-                    "normal": {
-                        "color": {
-                            "type": "linear",
-                            "x": 0,
-                            "y": 0,
-                            "x2": 0,
-                            "y2": 1,
-                            "colorStops": [{
-                                "offset": 0, "color": "rgba(255,0,0,1)"
-                            }, {
-                                "offset": 1, "color": "rgba(0,255,0,1)"
-                            }]
+                "tooltip": {
+                    "trigger": "axis",
+                    "axisPointer": {
+                        "type": "shadow"
+                    }
+                },
+                "xAxis": {
+                    "type": "category",
+                    "data": [word for word, _ in top_words],
+                    "axisLabel": {
+                        "interval": 0,
+                        "rotate": 45
+                    },
+                    "splitLine": {"show": False},
+                },
+                "yAxis": {
+                    "type": "value",
+                    "splitLine": {"show": False},
+                },
+                "series": [{
+                    "type": "bar",
+                    "data": [count for _, count in top_words],
+                    "itemStyle": {
+                        "normal": {
+                            "color": {
+                                "type": "linear",
+                                "x": 0,
+                                "y": 0,
+                                "x2": 0,
+                                "y2": 1,
+                                "colorStops": [{
+                                    "offset": 0, "color": "rgba(255,0,0,1)"
+                                }, {
+                                    "offset": 1, "color": "rgba(0,255,0,1)"
+                                }]
+                            }
                         }
                     }
-                }
-            }],
-            "visualMap": {
-                "type": "continuous",
-                "min": min([count for _, count in top_words]),
-                "max": max([count for _, count in top_words]),
-                "calculable": True,
-                "inRange": {
-                    "color": ["#00796B", "#FBC02D", "#E53935"]
+                }],
+                "visualMap": {
+                    "type": "continuous",
+                    "min": min([count for _, count in top_words]),
+                    "max": max([count for _, count in top_words]),
+                    "calculable": True,
+                    "inRange": {
+                        "color": ["#00796B", "#FBC02D", "#E53935"]
+                    }
                 }
             }
-        }
-
-    # 显示图表
-    if 'series' in bar_chart_options:
-        st_echarts(bar_chart_options, height='600px')
+    
+        # 显示图表
+        if 'series' in bar_chart_options:
+            st_echarts(bar_chart_options, height='600px')
 
 if __name__ == "__main__":
     run()
