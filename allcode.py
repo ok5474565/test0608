@@ -3,8 +3,8 @@ import streamlit as st
 # 导入子文件中的主函数
 from newspachong666 import main as news_crawl_main          
 from app_abstract import main as summary_main               
-from app_bar2 import run as bar_chart_run                  
-from app_worldcloud import run as wordcloud_run         
+from paqutiaoxingtu import run as paqutiaoxingtu_run                  
+from paquciyuntu import run as paquciyuntu_run         
 
 from tiaoxingtuall import main as tiaoxingtuall_main      
 from ciyuntuall import main as ciyuntuall_main            
@@ -65,9 +65,9 @@ if selected_option == "新闻爬虫":
 elif selected_option == "文本简要总结":
     summary_main()
 elif selected_option == "输入链接爬取内容统计词频条形图":
-    bar_chart_run()
+    paqutiaoxingtu_run()
 elif selected_option == "输入链接爬取内容生成词云图":
-    wordcloud_run()
+    paquciyuntu_run()
 elif selected_option == "在线文本分词与高频词统计":
     tiaoxingtuall_main()
 elif selected_option == "在线文本分词与词云图生成":
