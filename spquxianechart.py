@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import pyecharts
 from pyecharts.charts import Line
 from pyecharts import options as opts
 from pyecharts.globals import ThemeType
