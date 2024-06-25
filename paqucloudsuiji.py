@@ -50,7 +50,7 @@ def generate_wordcloud(word_counts, top_k, font_path):
         font_path=font_path,
         background_color='white',
         max_words=top_k,
-        max_font_size=80,  # 设置最大字体大小
+        max_font_size=None,  # 设置最大字体大小
         scale=5,  # 增加图像的清晰度，具体值可以根据结果调整
         random_state=42,
         width=1600,
