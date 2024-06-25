@@ -51,7 +51,7 @@ def generate_wordcloud(word_counts, top_k, font_path):
         background_color='white',
         max_words=top_k,
         max_font_size=80,  # 设置最大字体大小
-        scale=2,  # 增加图像的清晰度
+        scale=5,  # 增加图像的清晰度，具体值可以根据结果调整
         random_state=42,
         width=1600,
         height=1200,
@@ -106,8 +106,12 @@ def run():
             plt.imshow(wc, interpolation='bilinear')
             plt.axis('off')
 
+        # 初始生成词云图
+        wc_image = generate_wordcloud(word_counts, top_k, font_path='simhei.ttf')
+
         # 用于显示词云图的占位符
         wordcloud_placeholder = st.empty()
+        # 直接使用 st.image() 来显示图像
         wordcloud_placeholder.image(wc_image, use_column_width=True, caption='词云图')
 
 if __name__ == "__main__":
