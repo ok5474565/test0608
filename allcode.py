@@ -4,7 +4,7 @@ import streamlit as st
 from newspachong666 import main as news_crawl_main          
 from app_abstract import main as summary_main               
 from paqutiaoxingtu import run as paqutiaoxingtu_run                  
-from paquciyuntu import run as paquciyuntu_run         
+from paqucloud import run as paqucloud_run         
 
 from tiaoxingtuall import main as tiaoxingtuall_main      
 from ciyuntuall import main as ciyuntuall_main            
@@ -67,7 +67,7 @@ elif selected_option == "文本简要总结":
 elif selected_option == "输入链接爬取内容统计词频条形图":
     paqutiaoxingtu_run()
 elif selected_option == "输入链接爬取内容生成词云图":
-    paquciyuntu_run()
+    paqucloud_run()
 elif selected_option == "在线文本分词与高频词统计":
     tiaoxingtuall_main()
 elif selected_option == "在线文本分词与词云图生成":
