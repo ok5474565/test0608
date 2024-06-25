@@ -45,22 +45,23 @@ def extract_body_text(html):
 
 # 定义一个生成词云的函数
 def generate_wordcloud(word_counts, top_k, font_path):
-    wordcloud = WordCloud(
+    # 创建词云对象
+    wc = WordCloud(
         font_path=font_path,
         background_color='white',
         max_words=top_k,
-        max_font_size=None,
+        max_font_size=80,  # 设置最大字体大小
+        scale=2,  # 增加图像的清晰度
         random_state=42,
         width=1600,
         height=1200,
         colormap='viridis'
     ).generate_from_frequencies(word_counts)
+    
+    # 使用WordCloud的to_image方法获取高质量图像
+    image = wc.to_image()
 
-    # 使用matplotlib显示词云图
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.show()
+    return image
 
 # 定义主函数
 def run():
@@ -94,7 +95,7 @@ def run():
         def update_wordcloud():
             plt.clf()  # 清除之前的图像
             # 重新生成词云图
-            wc = WordCloud(
+            wc_image = WordCloud(
                 font_path='simhei.ttf',  # 指定字体路径
                 background_color='white',
                 max_words=top_k,
@@ -107,8 +108,7 @@ def run():
 
         # 用于显示词云图的占位符
         wordcloud_placeholder = st.empty()
-        update_wordcloud()  # 初始生成词云图
-        wordcloud_placeholder.pyplot(plt)
+        wordcloud_placeholder.image(wc_image, use_column_width=True, caption='词云图')
 
 if __name__ == "__main__":
     run()
