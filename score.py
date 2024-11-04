@@ -26,8 +26,8 @@ st.sidebar.title("功能选择")
 function_options = [
     #"新闻爬虫",
     #"文本简要总结",
-    "输入链接爬取内容统计词频条形图",
-    "输入链接爬取内容生成词云图",
+    #"输入链接爬取内容统计词频条形图",
+    #"输入链接爬取内容生成词云图",
     "在线文本分词与高频词统计",
     "在线文本分词与词云图生成",
     "根据得分统计表制作S - P表格",
@@ -44,13 +44,13 @@ selected_option = st.sidebar.selectbox(
 )
 
 # 根据用户选择的功能，调用相应的主函数
-if selected_option == "新闻爬虫":
-    news_crawl_main()
-elif selected_option == "输入链接爬取内容统计词频条形图":
-    paqutiaoxingtu_run()
-elif selected_option == "输入链接爬取内容生成词云图":
-    paqucloud_run()
-elif selected_option == "在线文本分词与高频词统计":
+#if selected_option == "新闻爬虫":
+#    news_crawl_main()
+#elif selected_option == "输入链接爬取内容统计词频条形图":
+#    paqutiaoxingtu_run()
+#elif selected_option == "输入链接爬取内容生成词云图":
+#    paqucloud_run()
+if selected_option == "在线文本分词与高频词统计":
     tiaoxingtuall_main()
 elif selected_option == "在线文本分词与词云图生成":
     ciyuntuall_main()
