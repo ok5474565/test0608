@@ -16,7 +16,7 @@ def main():
     st.title("学生成绩分析工具")
     
     # 设置页面配置
-    st.set_page_config(page_title="学生成绩分析工具", layout="wide")
+    #st.set_page_config(page_title="学生成绩分析工具", layout="wide")
 
     # 创建侧边栏
     st.sidebar.title("功能选择")
