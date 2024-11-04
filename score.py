@@ -51,6 +51,8 @@ def main():
         sppicecharts_main()
     elif selected_option == "根据表格计算注意系数、差异系数":
         spcalculate_main()
+    elif selected_option == "根据表格计算注意系数、差异系数":
+        spcalculate_main()
     else:
         st.sidebar.write("请选择一个有效选项。")
 
