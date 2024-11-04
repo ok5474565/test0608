@@ -30,7 +30,7 @@ def main():
         "根据得分统计表制作S - P表格",
         "根据S-P表格使用maplotlib绘制S-P曲线",
         "根据S-P表格使用echarts绘制S-P曲线",
-        "根据表格计算注意系数、差异系数"
+        "根据表格计算题目区分度及难度"
     ]
 
     selected_option = st.sidebar.selectbox(
