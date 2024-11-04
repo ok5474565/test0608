@@ -13,6 +13,8 @@ from sppicecharts import main as sppicecharts_main
 from spcalculate import main as spcalculate_main
 
 def main():
+    st.title("学生成绩分析工具")
+    
     # 设置页面配置
     st.set_page_config(page_title="学生成绩分析工具", layout="wide")
 
