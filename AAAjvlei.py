@@ -5,9 +5,12 @@ from scipy.spatial.distance import pdist
 import streamlit as st
 import tempfile
 import os
+from matplotlib.font_manager import FontProperties
 
 # 设置matplotlib支持中文显示
-plt.rcParams['font.sans-serif'] = ['simHei']  # Windows系统使用SimHei字体
+# 尝试加载SimHei字体，如果加载失败则使用默认字体
+font_path = 'simHei.ttf'  # 指定字体文件路径
+font_prop = FontProperties(fname=font_path, size=14)
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
 # 创建Streamlit应用
@@ -31,11 +34,11 @@ def main():
         
         # 绘制树状图
         plt.figure(figsize=(36, 18))  # 进一步增加图形的宽度和高度
-        plt.title('Hierarchical Clustering Dendrogram', fontsize=20)
-        plt.xlabel('Keywords', fontsize=14)  # 适当减小字体大小
-        plt.ylabel('Distance', fontsize=14)
-        dendrogram(Z, labels=df.index)  # 绘制树状图
-        plt.xticks(rotation=90, fontsize=10)  # 适当减小字体大小
+        plt.title('Hierarchical Clustering Dendrogram', fontsize=20, fontproperties=font_prop)
+        plt.xlabel('Keywords', fontsize=14, fontproperties=font_prop)  # 适当减小字体大小
+        plt.ylabel('Distance', fontsize=14, fontproperties=font_prop)
+        dendrogram(Z, labels=df.index, fontproperties=font_prop)  # 绘制树状图
+        plt.xticks(rotation=90, fontsize=10, fontproperties=font_prop)  # 适当减小字体大小
         plt.tight_layout()  # 自动调整子图参数, 使之填充整个图像区域。
         
         # 保存图片到临时目录
