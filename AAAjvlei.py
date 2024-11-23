@@ -8,7 +8,7 @@ import os
 from matplotlib.font_manager import FontProperties
 
 # 设置matplotlib支持中文显示
-plt.rcParams['font.sans-serif'] = ['SimHei']  # Windows系统使用SimHei字体
+plt.rcParams['font.sans-serif'] = ['simhei']  # Windows系统使用SimHei字体
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
 # 创建Streamlit应用
@@ -35,10 +35,14 @@ def main():
         plt.title('Hierarchical Clustering Dendrogram', fontsize=20)
         
         # 创建字体属性对象
-        font_prop = FontProperties(fname='SimHei.ttf', size=14)
+        font_prop = FontProperties(fname='simhei.ttf', size=14)
         
         # 绘制树状图
-        dendrobj = dendrogram(Z, labels=df.index, ax=plt.gca(), leaf_rotation=90, leaf_fontproperties=font_prop)
+        dendrobj = dendrogram(Z, labels=df.index, leaf_rotation=90)
+        
+        # 设置叶子节点标签的字体
+        for i, d in enumerate(dendrobj['leaves']):
+            plt.text(d, dendrobj['yloc'][d], df.index[i], va='top', rotation=90, fontproperties=font_prop)
         
         plt.xlabel('Keywords', fontsize=14, fontproperties=font_prop)
         plt.ylabel('Distance', fontsize=14, fontproperties=font_prop)
