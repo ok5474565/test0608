@@ -3,15 +3,12 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import pdist
 import streamlit as st
-import tempfile
-import os
-from matplotlib.font_manager import FontProperties
+import io
 
 # 设置matplotlib支持中文显示
-plt.rcParams['font.sans-serif'] = ['simhei']  # Windows系统使用SimHei字体
+plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']  # 使用Arial Unicode MS，这在大多数环境中都可用
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
-# 创建Streamlit应用
 def main():
     # 用户上传文件
     uploaded_file = st.file_uploader("Choose an Excel file", type=['xlsx'])
@@ -33,28 +30,22 @@ def main():
         # 绘制树状图
         plt.figure(figsize=(36, 18))  # 进一步增加图形的宽度和高度
         plt.title('Hierarchical Clustering Dendrogram', fontsize=20)
-        
-        # 创建字体属性对象
-        font_prop = FontProperties(fname='simhei.ttf', size=14)
-        
-        # 绘制树状图
-        dendrobj = dendrogram(Z, labels=df.index, leaf_rotation=90)
-        
-        # 设置叶子节点标签的字体
-        for i, d in enumerate(dendrobj['leaves']):
-            plt.text(d, dendrobj['yloc'][d], df.index[i], va='top', rotation=90, fontproperties=font_prop)
-        
-        plt.xlabel('Keywords', fontsize=14, fontproperties=font_prop)
-        plt.ylabel('Distance', fontsize=14, fontproperties=font_prop)
-        plt.xticks(fontsize=10, fontproperties=font_prop)
+        plt.xlabel('Keywords', fontsize=14)  # 适当减小字体大小
+        plt.ylabel('Distance', fontsize=14)
+        dendrogram(Z, labels=df.index)  # 绘制树状图
+        plt.xticks(rotation=90, fontsize=10)  # 适当减小字体大小
         plt.tight_layout()  # 自动调整子图参数, 使之填充整个图像区域。
         
-        # 保存图片到临时目录
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            img_path = os.path.join(tmpdirname, 'hierarchical_clustering_dendrogram.png')
-            plt.savefig(img_path)  # 指定保存路径和文件名
-            plt.close()  # 关闭图形，避免在Streamlit中显示
-            st.image(img_path, caption='Hierarchical Clustering Dendrogram', use_column_width=True)  # 显示图片
+        # 将图像保存到一个字节流中
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format='png')
+        img_buffer.seek(0)
+        
+        # 使用Streamlit显示图像
+        st.image(img_buffer, caption='Hierarchical Clustering Dendrogram', use_column_width=True)
+        
+        # 关闭图形，避免在Streamlit中显示
+        plt.close()
 
 if __name__ == '__main__':
     main()
