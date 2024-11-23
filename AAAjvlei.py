@@ -9,7 +9,7 @@ from matplotlib.font_manager import FontProperties
 
 # 设置matplotlib支持中文显示
 # 尝试加载SimHei字体，如果加载失败则使用默认字体
-font_path = 'SimHei.ttf'  # 指定字体文件路径
+font_path = 'simHei.ttf'  # 指定字体文件路径
 font_prop = FontProperties(fname=font_path, size=14)
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
