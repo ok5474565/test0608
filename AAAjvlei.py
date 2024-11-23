@@ -8,9 +8,7 @@ import os
 from matplotlib.font_manager import FontProperties
 
 # 设置matplotlib支持中文显示
-# 尝试加载SimHei字体，如果加载失败则使用默认字体
-font_path = 'simhei.ttf'  # 指定字体文件路径
-font_prop = FontProperties(fname=font_path, size=14)
+plt.rcParams['font.sans-serif'] = ['simhei']  # Windows系统使用SimHei字体
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
 # 创建Streamlit应用
@@ -34,11 +32,24 @@ def main():
         
         # 绘制树状图
         plt.figure(figsize=(36, 18))  # 进一步增加图形的宽度和高度
-        plt.title('Hierarchical Clustering Dendrogram', fontsize=20, fontproperties=font_prop)
-        plt.xlabel('Keywords', fontsize=14, fontproperties=font_prop)  # 适当减小字体大小
-        plt.ylabel('Distance', fontsize=14, fontproperties=font_prop)
-        dendrogram(Z, labels=df.index, fontproperties=font_prop)  # 绘制树状图
-        plt.xticks(rotation=90, fontsize=10, fontproperties=font_prop)  # 适当减小字体大小
+        plt.title('Hierarchical Clustering Dendrogram', fontsize=20)
+        
+        # 创建字体属性对象
+        font_prop = FontProperties(fname='SimHei.ttf', size=14)
+        
+        # 绘制树状图并设置字体
+        dendrobj = dendrogram(Z, labels=df.index)
+        for i in range(len(dendrobj['ivl'])):
+            plt.text(dendrobj['ivl'][i], dendrobj['h_yloc'][i] + 0.02,
+                    str(round(dendrobj['d'][i], 3)),
+                    rotate=90, va='bottom', fontproperties=font_prop)
+        for i, d in enumerate(dendrobj['leaves']):
+            plt.text(d, dendrobj['yloc'][d] - 0.1, df.index[i],
+                    va='top', rotation=90, fontproperties=font_prop)
+        
+        plt.xlabel('Keywords', fontsize=14)
+        plt.ylabel('Distance', fontsize=14)
+        plt.xticks(rotation=90, fontsize=10)
         plt.tight_layout()  # 自动调整子图参数, 使之填充整个图像区域。
         
         # 保存图片到临时目录
