@@ -12,6 +12,7 @@ plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
 # 创建Streamlit应用
 def main():
+    st.title('文献关键词聚类')
     # 用户上传文件
     uploaded_file = st.file_uploader("Choose an Excel file", type=['xlsx'])
     
