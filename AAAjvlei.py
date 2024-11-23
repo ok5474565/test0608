@@ -7,7 +7,7 @@ import tempfile
 import os
 
 # 设置matplotlib支持中文显示
-plt.rcParams['font.sans-serif'] = ['SimHei']  # Windows系统使用SimHei字体
+plt.rcParams['font.sans-serif'] = ['simHei']  # Windows系统使用SimHei字体
 plt.rcParams['axes.unicode_minus'] = False  # 正确显示负号
 
 # 创建Streamlit应用
